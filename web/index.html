@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>That Day — Your personal historian</title>
+  <meta name="description" content="See every July 4th across your entire life. That Day turns your photos into daily stories, read aloud, and delivered every morning.">
+  <link rel="icon" type="image/png" sizes="64x64" href="/icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,500&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --paper: #FDFAF4;
+      --ink: #2C2416;
+      --warm: #4A3728;
+      --accent: #C4744F;
+      --muted: #A69B8D;
+      --line: #E8E0D5;
+      --surface: #FFFBF5;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.75;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* nav */
+    .nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.5rem 2rem; max-width: 1200px; margin: 0 auto;
+    }
+    .nav-brand { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: var(--ink); }
+    .nav-brand img { width: 36px; height: 36px; border-radius: 8px; }
+    .nav-brand span {
+      font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em;
+    }
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
+    .nav-links a { color: var(--warm); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--accent); }
+    .btn-nav, .btn-nav:link, .btn-nav:visited {
+      background: var(--ink); color: var(--paper); border: none;
+      padding: 0.5rem 1.25rem; border-radius: 6px; font-family: 'Lora', serif;
+      font-size: 0.9rem; cursor: pointer; text-decoration: none; display: inline-block;
+      transition: background 0.2s;
+    }
+    .btn-nav:hover { background: var(--accent); }
+
+    /* hero */
+    .hero {
+      max-width: 900px; margin: 5rem auto 4rem; text-align: center; padding: 0 2rem;
+    }
+    .hero h1 {
+      font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 900; line-height: 1.12; letter-spacing: -0.02em; color: var(--ink);
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 em {
+      font-style: italic; font-weight: 500; color: var(--accent);
+      position: relative;
+    }
+    .hero p.lead {
+      font-size: 1.25rem; color: var(--warm); max-width: 620px; margin: 0 auto 2.5rem; line-height: 1.8;
+    }
+    .hero .cta-row { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; align-items: center; }
+    .btn-primary {
+      background: var(--ink); color: var(--paper); border: none;
+      padding: 0.9rem 2.25rem; border-radius: 8px;
+      font-family: 'Lora', serif; font-size: 1.05rem; font-weight: 500;
+      cursor: pointer; text-decoration: none; display: inline-block;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-primary:hover { background: var(--accent); transform: translateY(-1px); }
+    .pricing-tag { color: var(--muted); font-size: 0.9rem; }
+
+    /* features */
+    .features {
+      max-width: 1100px; margin: 0 auto; padding: 3rem 2rem 5rem;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2.5rem;
+    }
+    .feature {
+      padding: 2rem 1.5rem; border-top: 2px solid var(--line); transition: border-color 0.3s;
+    }
+    .feature:hover { border-top-color: var(--accent); }
+    .feature h3 {
+      font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700;
+      margin-bottom: 0.75rem; color: var(--ink);
+    }
+    .feature p { color: var(--warm); font-size: 0.95rem; }
+
+    /* timeline */
+    .how-it-works {
+      max-width: 900px; margin: 0 auto; padding: 2rem 2rem 6rem;
+    }
+    .how-it-works h2 {
+      font-family: 'Playfair Display', serif; font-size: 2.25rem; font-weight: 700;
+      text-align: center; margin-bottom: 3rem; color: var(--ink);
+    }
+    .step {
+      display: flex; gap: 2rem; align-items: flex-start; margin-bottom: 3rem;
+    }
+    .step-num {
+      flex-shrink: 0; width: 52px; height: 52px;
+      border: 2px solid var(--line); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700;
+      color: var(--accent);
+    }
+    .step h4 { font-family: 'Playfair Display', serif; font-size: 1.2rem; margin-bottom: 0.3rem; }
+    .step p { color: var(--warm); font-size: 0.95rem; }
+
+    /* pricing */
+    .pricing-section {
+      background: var(--surface); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+      padding: 5rem 2rem; text-align: center;
+    }
+    .pricing-section h2 {
+      font-family: 'Playfair Display', serif; font-size: 2.25rem; font-weight: 700;
+      margin-bottom: 0.5rem; color: var(--ink);
+    }
+    .pricing-section .sub { color: var(--muted); margin-bottom: 2rem; }
+    .price-card {
+      display: inline-block; background: white; border: 1px solid var(--line);
+      border-radius: 12px; padding: 2.5rem 3rem; text-align: center;
+    }
+    .price-amount {
+      font-family: 'Playfair Display', serif; font-size: 3.5rem; font-weight: 900;
+      color: var(--ink); line-height: 1;
+    }
+    .price-period { color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
+    .price-features { list-style: none; text-align: left; margin-bottom: 2rem; }
+    .price-features li { padding: 0.4rem 0; color: var(--warm); font-size: 0.9rem; }
+    .price-features li::before { content: '✓ '; color: var(--accent); font-weight: 700; }
+
+    /* footer */
+    .site-footer {
+      max-width: 1100px; margin: 0 auto; padding: 3rem 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 1.5rem;
+      border-top: 1px solid var(--line);
+    }
+    .site-footer .footer-brand { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; }
+    .site-footer .footer-links { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+    .site-footer .footer-links a { color: var(--muted); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+    .site-footer .footer-links a:hover { color: var(--accent); }
+
+    @media (max-width: 600px) {
+      .hero { margin: 3rem auto 2rem; }
+      .step { flex-direction: column; gap: 0.75rem; }
+      .nav { flex-wrap: wrap; gap: 1rem; }
+      .nav-links { gap: 1rem; }
+      .site-footer { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="/" class="nav-brand">
+      <img src="icon.png" alt="That Day" width="36" height="36">
+      <span>That Day</span>
+    </a>
+    <div class="nav-links">
+      <a href="/blog.html">Blog</a>
+      <a href="#pricing">Pricing</a>
+      <a href="https://api.thatday.vip/download" class="btn-nav">Download for Windows</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <h1>Browse your life,<br>one day at a time.<br><em>Across every year.</em></h1>
+    <p class="lead">
+      See what you were doing on July&nbsp;4th in 2018. Then&nbsp;2020. Then&nbsp;2023.
+      That Day scans your photo library, lets you add three words per photo,
+      and every morning sends you a warm, personal story — written by AI, read aloud in English.
+    </p>
+    <div class="cta-row">
+      <a href="https://api.thatday.vip/download" class="btn-primary">Download for Windows</a>
+      <span class="pricing-tag">$9.79/month · 7-day free trial · No credit card needed · Cancel anytime · <a href="https://api.thatday.vip/download" style="color:var(--accent)">Already subscribed?</a></span>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="feature">
+      <h3>One Day, Every Year</h3>
+      <p>Pick a date — any date. That Day shows you photos from that same calendar day across 2017, 2020, 2023, and beyond. A single screen holds a decade of you.</p>
+    </div>
+    <div class="feature">
+      <h3>Three Words Unlock the Story</h3>
+      <p>Who were you with? Where? Doing what? Answer three questions — or just speak them — and the AI fills in the rest. No typing required.</p>
+    </div>
+    <div class="feature">
+      <h3>Your Life, Read to You</h3>
+      <p>Every morning at 8, your inbox holds a story. Open it and listen — a warm English voice reads your day back to you. No app needed.</p>
+    </div>
+    <div class="feature">
+      <h3>A Keepsake for Every Day</h3>
+      <p>Each story becomes a PDF — cover, photos, captions, the full narrative. Print it. Share it. Watch a shelf fill with you.</p>
+    </div>
+    <div class="feature">
+      <h3>Your Photos Never Leave</h3>
+      <p>Everything stays on your computer. Only the annotations and stories sync to the cloud. No uploads, no privacy trade-offs.</p>
+    </div>
+    <div class="feature">
+      <h3>Beautiful English Voices</h3>
+      <p>High-fidelity neural TTS reads your stories with natural rhythm and warmth — like a friend telling you about your own day.</p>
+    </div>
+  </section>
+
+  <section class="how-it-works">
+    <h2>How it works</h2>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div>
+        <h4>Scan your photos</h4>
+        <p>Choose a folder — or let That Day scan your entire computer. It finds every photo, reads every date, groups them by calendar day across all years.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div>
+        <h4>Add three words</h4>
+        <p>For each photo, answer: Who? Where? Doing what? Type it or say it — the AI fills in the rest. A day's annotation takes two minutes.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div>
+        <h4>Seal today</h4>
+        <p>Hit Seal. Your annotations are saved, a story is generated, and an audio file is created. Everything saved to your Documents folder.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div>
+        <h4>Wake up to your story</h4>
+        <p>Every morning at 8 AM, open your inbox. Your story is there — read it, listen to it, or download the PDF keepsake.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="pricing-section" id="pricing">
+    <h2>One plan. Your entire life.</h2>
+    <p class="sub">Start with a 7-day free trial. No credit card needed for the trial.</p>
+    <div class="price-card">
+      <div class="price-amount">$9.79</div>
+      <div class="price-period">per month</div>
+      <ul class="price-features">
+        <li>Photos from 2017 to today</li>
+        <li>Up to 100 photos per day</li>
+        <li>AI-written daily story</li>
+        <li>Natural voice audio narration</li>
+        <li>PDF keepsake for every day</li>
+        <li>Daily email delivery at 8 AM</li>
+        <li>Cancel anytime</li>
+      </ul>
+      <a href="https://www.creem.io/payment/prod_obMCgrB5eBPVgribzvS5p" class="btn-primary">Subscribe Now</a>
+      <p class="pricing-tag" style="margin-top:0.75rem">or <a href="https://api.thatday.vip/download" style="color:var(--accent)">Download</a> to start a free trial — no credit card needed</p>
+    </div>
+  </section>
+
+  <section class="how-it-works" style="text-align:center" id="download">
+    <h2>Download for Windows</h2>
+    <p style="color:var(--warm);margin-bottom:1.5rem">That Day runs on your desktop. Your photos, your computer, your stories.</p>
+    <a href="https://api.thatday.vip/download" class="btn-primary" style="background:var(--accent)">Download .msi installer</a>
+    <p class="pricing-tag" style="margin-top:1rem">macOS coming soon</p>
+  </section>
+
+  <footer class="site-footer">
+    <div class="footer-brand">That Day</div>
+    <div class="footer-links">
+      <a href="/blog.html">Blog</a>
+      <a href="/subscribe.html">Subscribe</a>
+      <a href="/privacy.html">Privacy Policy</a>
+      <a href="/terms.html">Terms of Service</a>
+      <a href="/cookies.html">Cookie Policy</a>
+      <a href="/refund.html">Refund Policy</a>
+      <a href="/contact.html">Contact Us</a>
+    </div>
+  </footer>
+</body>
+</html>

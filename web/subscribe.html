@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subscribe — That Day</title>
+  <link rel="icon" type="image/png" sizes="64x64" href="/icon.png">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --paper: #FDFAF4; --ink: #2C2416; --accent: #C4744F; --muted: #A69B8D; --line: #E8E0D5; }
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      background: var(--paper); color: var(--ink);
+      line-height: 1.75; -webkit-font-smoothing: antialiased;
+      display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem;
+    }
+    .card {
+      max-width: 480px; width: 100%; text-align: center;
+      background: white; border: 1px solid var(--line); border-radius: 12px;
+      padding: 3rem 2rem; box-shadow: 0 2px 16px rgba(44,36,22,0.05);
+    }
+    h1 { font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--ink); }
+    .sub { color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem; }
+    .help { background: #FFFBF5; border: 1px solid var(--line); border-radius: 8px; padding: 1rem; margin-bottom: 2rem; text-align: left; font-size: 0.9rem; color: #4A3728; line-height: 1.6; }
+    .help strong { color: var(--accent); }
+    .btn {
+      display: inline-block; background: var(--ink); color: var(--paper);
+      padding: 0.9rem 2.5rem; border-radius: 8px; text-decoration: none;
+      font-size: 1.05rem; font-weight: 500; transition: background 0.2s;
+    }
+    .btn:hover { background: var(--accent); }
+    .price { color: var(--muted); font-size: 0.85rem; margin-top: 1rem; }
+    .back { color: var(--muted); font-size: 0.8rem; margin-top: 1.5rem; }
+    .back a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Subscribe to That Day</h1>
+    <p class="sub">$9.79/month · 7-day free trial · Cancel anytime</p>
+
+    <div class="help">
+      <strong>Are you subscribing for someone else?</strong><br>
+      When checking out on Creem, enter <strong>their That Day email</strong> as the billing email.
+      That's how we'll know whose account to upgrade.
+    </div>
+
+    <a href="https://www.creem.io/payment/prod_obMCgrB5eBPVgribzvS5p" class="btn">Subscribe Now</a>
+    <p class="price">No credit card needed for the free trial.</p>
+    <p class="back"><a href="/">← Back to That Day</a></p>
+  </div>
+</body>
+</html>

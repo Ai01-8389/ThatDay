@@ -1,0 +1,18 @@
+name = "thatday-api-v2"
+main = "src/index.ts"
+compatibility_date = "2025-06-22"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "thatday-db-v2"
+database_id = "cbe67e4a-6f32-4d0e-9e40-049b8494869c"
+
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "thatday-pdfs"
+
+[triggers]
+crons = ["0 0 * * *", "0 12 * * *", "0 19 * * *"]
+
+[vars]
+SUPER_ACCOUNTS = "focusclaw@outlook.com"

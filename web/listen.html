@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>That Day — Listen</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: Georgia, "Times New Roman", serif;
+      background: #faf8f5;
+      color: #1f2937;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      max-width: 640px;
+      width: 100%;
+      padding: 3rem 1.5rem;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 400;
+      color: #6b7280;
+      margin-bottom: 0.5rem;
+    }
+    header .title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1f2937;
+      line-height: 1.3;
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    .btn {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: none;
+      background: #4F46E5;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn:hover { background: #4338CA; }
+    .btn:active { transform: scale(0.95); }
+    .btn.paused { background: #059669; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .progress-bar {
+      flex: 1;
+      max-width: 200px;
+      height: 4px;
+      background: #e5e7eb;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: #4F46E5;
+      width: 0%;
+      transition: width 0.1s linear;
+    }
+    .content {
+      font-size: 1.2rem;
+      line-height: 2;
+      color: #374151;
+    }
+    .content mark {
+      background: #FEF3C7;
+      color: #1f2937;
+      border-radius: 2px;
+      padding: 0 2px;
+    }
+    .empty {
+      text-align: center;
+      color: #9ca3af;
+      padding: 4rem 1rem;
+      font-size: 1.1rem;
+    }
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid #e5e7eb;
+    }
+    footer a {
+      color: #4F46E5;
+      text-decoration: none;
+      font-size: 0.875rem;
+    }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="app"></div>
+  </div>
+
+  <script>
+    // ── Utilities ──
+    function escapeHtml(str) {
+      const div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function base64urlDecode(str) {
+      str = str.replace(/-/g, "+").replace(/_/g, "/");
+      while (str.length % 4) str += "=";
+      return decodeURIComponent(escape(atob(str)));
+    }
+
+    function parseHash() {
+      const hash = window.location.hash.slice(1);
+      if (!hash) return null;
+      try {
+        const decoded = base64urlDecode(hash);
+        const sep = decoded.indexOf("|");
+        if (sep === -1) return { title: "Your story", content: decoded };
+        return {
+          title: decoded.slice(0, sep),
+          content: decoded.slice(sep + 1),
+        };
+      } catch {
+        return null;
+      }
+    }
+
+    function splitSentences(text) {
+      return text.split(/(?<=[.!?])\s+/).filter(function(s) { return s.trim(); });
+    }
+
+    // ── Render ──
+    var app = document.getElementById("app");
+
+    // Check for WAV audio URL from query params (new media links)
+    var params = new URLSearchParams(window.location.search);
+    var audioUrl = params.get("audio");
+    var storyTitle = params.get("title") || "Your story";
+    var storyText = params.get("text");
+
+    if (audioUrl) {
+      // ── WAV playback mode (high-quality Piper audio) ──
+      app.innerHTML =
+        '<header>' +
+        '  <h1>That Day</h1>' +
+        '  <div class="title">' + escapeHtml(storyTitle) + '</div>' +
+        '</header>' +
+        '<div class="controls">' +
+        '  <button class="btn" id="playBtn" title="Play/Pause">\u25B6</button>' +
+        '  <div class="progress-bar">' +
+        '    <div class="progress-fill" id="progressFill"></div>' +
+        '  </div>' +
+        '</div>' +
+        (storyText ? '<div class="content"><p>' + escapeHtml(storyText) + '</p></div>' : '') +
+        '<footer>' +
+        '  <a href="https://thatday.vip">That Day</a> \u2014 Every day deserves to be remembered' +
+        '</footer>';
+
+      var audio = new Audio();
+      audio.src = audioUrl;
+      audio.preload = "metadata";
+      var playBtn = document.getElementById("playBtn");
+      var progressFill = document.getElementById("progressFill");
+      var playing = false;
+
+      audio.addEventListener("loadedmetadata", function() { playBtn.disabled = false; });
+      audio.addEventListener("timeupdate", function() {
+        if (audio.duration) progressFill.style.width = (audio.currentTime / audio.duration * 100) + "%";
+      });
+      audio.addEventListener("ended", function() {
+        playing = false;
+        playBtn.textContent = "\u25B6";
+        playBtn.classList.remove("paused");
+      });
+      audio.addEventListener("error", function() {
+        playBtn.disabled = true;
+        playBtn.textContent = "!";
+        playBtn.title = "Audio failed to load";
+      });
+
+      playBtn.addEventListener("click", function() {
+        if (playing) { audio.pause(); playing = false; playBtn.textContent = "\u25B6"; playBtn.classList.remove("paused"); }
+        else { audio.play(); playing = true; playBtn.textContent = "\u23F8"; playBtn.classList.add("paused"); }
+      });
+
+      document.addEventListener("keydown", function(e) {
+        if (e.code === "Space") { e.preventDefault(); playBtn.click(); }
+      });
+
+    } else {
+      var story = parseHash();
+
+    if (!story) {
+      app.innerHTML = '<div class="empty"><p>No story to read.</p><p style="font-size:0.9rem;margin-top:0.5rem">This page is meant to be opened from your daily That Day email.</p></div>';
+    } else {
+      var sentences = splitSentences(story.content);
+      var totalSentences = sentences.length;
+
+      app.innerHTML =
+        '<header>' +
+        '  <h1>That Day</h1>' +
+        '  <div class="title">' + escapeHtml(story.title) + '</div>' +
+        '</header>' +
+        '<div class="controls">' +
+        '  <button class="btn" id="playBtn" title="Play/Pause">\u25B6</button>' +
+        '  <div class="progress-bar">' +
+        '    <div class="progress-fill" id="progressFill"></div>' +
+        '  </div>' +
+        '  <span id="timeLabel" style="font-size:0.8rem;color:#9ca3af;min-width:60px;text-align:right">0:00</span>' +
+        '</div>' +
+        '<div class="content" id="content">' +
+        sentences.map(function(s, i) { return '<span data-idx="' + i + '">' + escapeHtml(s) + '</span> '; }).join("") +
+        '</div>' +
+        '<footer>' +
+        '  <a href="https://thatday.vip">That Day</a> \u2014 Every day deserves to be remembered' +
+        '</footer>';
+
+      // ── Web Speech API ──
+      var synth = window.speechSynthesis;
+      var playBtn = document.getElementById("playBtn");
+
+      if (!synth) {
+        playBtn.disabled = true;
+        playBtn.title = "Speech not supported in this browser";
+      } else {
+        setupSpeech();
+      }
+
+      function setupSpeech() {
+        var playing = false;
+        var utterance = null;
+        var currentSentence = -1;
+        var bestVoice = null;
+
+        // Pick the best available English voice (Microsoft/Google > macOS > others)
+        function pickBestVoice() {
+          var voices = synth.getVoices();
+          if (!voices.length) return null;
+          var en = voices.filter(function(v) { return v.lang.indexOf("en") === 0; });
+          en.sort(function(a, b) {
+            var na = a.name.toLowerCase(), nb = b.name.toLowerCase();
+            var sa = na.indexOf("microsoft") >= 0 && na.indexOf("zira") < 0 ? 1 :
+                     na.indexOf("google") >= 0 ? 2 :
+                     na.indexOf("samantha") >= 0 || na.indexOf("alex") >= 0 ? 3 : 4;
+            var sb = nb.indexOf("microsoft") >= 0 && nb.indexOf("zira") < 0 ? 1 :
+                     nb.indexOf("google") >= 0 ? 2 :
+                     nb.indexOf("samantha") >= 0 || nb.indexOf("alex") >= 0 ? 3 : 4;
+            return sa - sb;
+          });
+          bestVoice = en[0] || null;
+        }
+        pickBestVoice();
+        if (!bestVoice) synth.addEventListener("voiceschanged", function() { pickBestVoice(); });
+
+        function highlightSentence(idx) {
+          document.querySelectorAll(".content span").forEach(function(el, i) {
+            el.innerHTML = i === idx ? '<mark>' + el.textContent + '</mark>' : el.textContent;
+          });
+        }
+
+        function updateProgress(ratio) {
+          document.getElementById("progressFill").style.width = (ratio * 100) + "%";
+        }
+
+        function speakFrom(idx) {
+          if (idx >= totalSentences) {
+            stop();
+            updateProgress(1);
+            return;
+          }
+
+          synth.cancel();
+          currentSentence = idx;
+          highlightSentence(idx);
+
+          var text = sentences[idx];
+          utterance = new SpeechSynthesisUtterance(text);
+          utterance.lang = "en-US";
+          utterance.rate = 0.95;
+          utterance.pitch = 1.0;
+          if (bestVoice) utterance.voice = bestVoice;
+
+          utterance.onend = function() {
+            currentSentence++;
+            updateProgress(currentSentence / totalSentences);
+            if (currentSentence < totalSentences) {
+              speakFrom(currentSentence);
+            } else {
+              stop();
+            }
+          };
+
+          utterance.onboundary = function(e) {
+            if (e.charIndex !== undefined) {
+              updateProgress((currentSentence + e.charIndex / text.length) / totalSentences);
+            }
+          };
+
+          utterance.onerror = function(e) {
+            if (e.error !== "canceled" && e.error !== "interrupted") {
+              console.error("Speech error:", e.error);
+            }
+          };
+
+          synth.speak(utterance);
+        }
+
+        function play() {
+          playing = true;
+          playBtn.textContent = "\u23F8";
+          playBtn.classList.add("paused");
+          if (synth.paused) {
+            synth.resume();
+          } else {
+            speakFrom(Math.max(0, currentSentence));
+          }
+        }
+
+        function pause() {
+          playing = false;
+          playBtn.textContent = "\u25B6";
+          playBtn.classList.remove("paused");
+          synth.pause();
+        }
+
+        function stop() {
+          playing = false;
+          currentSentence = -1;
+          playBtn.textContent = "\u25B6";
+          playBtn.classList.remove("paused");
+          updateProgress(0);
+          document.querySelectorAll(".content span").forEach(function(el) {
+            el.innerHTML = el.textContent;
+          });
+        }
+
+        playBtn.addEventListener("click", function() {
+          playing ? pause() : play();
+        });
+
+        document.addEventListener("keydown", function(e) {
+          if (e.code === "Space") {
+            e.preventDefault();
+            playing ? pause() : play();
+          }
+        });
+      }
+    }
+    }  // close outer else (text + Web Speech mode)
+  </script>
+</body>
+</html>

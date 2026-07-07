@@ -1,0 +1,27 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+rizhi.txt
+
+# Rust build artifacts
+desktop/src-tauri/target/
+
+# Node
+desktop/node_modules/
+worker/node_modules/
+node_modules/
+
+# Build output
+desktop/dist/
+
+# Wrangler state / deploy cache
+worker/.wrangler/
+web/.wrangler/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

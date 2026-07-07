@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — That Day</title>
+  <link rel="icon" type="image/png" sizes="64x64" href="/icon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700;900&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--paper:#FDFAF4;--ink:#2C2416;--warm:#4A3728;--accent:#C4744F;--muted:#A69B8D;--line:#E8E0D5}
+    body{font-family:'Lora',Georgia,serif;background:var(--paper);color:var(--ink);line-height:1.75}
+    .nav{display:flex;align-items:center;justify-content:space-between;padding:1.5rem 2rem;max-width:1200px;margin:0 auto}
+    .nav-brand{display:flex;align-items:center;gap:.75rem;text-decoration:none;color:var(--ink)}
+    .nav-brand img{width:36px;height:36px;border-radius:8px}
+    .nav-brand span{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700}
+    main{max-width:760px;margin:0 auto;padding:2rem 2rem 5rem}
+    h1{font-family:'Playfair Display',serif;font-size:2.2rem;margin-bottom:2rem}
+    h2{font-family:'Playfair Display',serif;font-size:1.4rem;margin-top:2rem;margin-bottom:.75rem}
+    p,li{color:var(--warm);margin-bottom:1rem;font-size:.95rem}
+    ul{padding-left:1.5rem;margin-bottom:1rem}
+    .last-updated{color:var(--muted);font-size:.85rem;margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--line)}
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="/" class="nav-brand"><img src="icon.png" alt="That Day" width="36" height="36"><span>That Day</span></a>
+  </nav>
+  <main>
+    <h1>Privacy Policy</h1>
+    <p>That Day is a desktop application that helps you revisit your photos from the same calendar day across many years. We take your privacy seriously.</p>
+
+    <h2>What we collect</h2>
+    <ul>
+      <li><strong>Email address</strong> — used for authentication and daily story delivery.</li>
+      <li><strong>Photo annotations</strong> — the text you enter (who, where, event) for each photo. These are synced to our servers to generate your daily story.</li>
+      <li><strong>AI-generated stories</strong> — stored on our servers so you can revisit them and receive them by email.</li>
+      <li><strong>Temporary media files</strong> — PDF keepsakes and audio narrations are stored in Cloudflare R2 for 7 days, then automatically deleted.</li>
+    </ul>
+
+    <h2>What we do NOT collect</h2>
+    <ul>
+      <li><strong>Your photos</strong> — they never leave your computer. That Day reads them locally for scanning and thumbnail generation only.</li>
+      <li><strong>Photo GPS coordinates</strong> — if present in EXIF data, they are used only during story generation (for weather lookup) and are never stored in our database.</li>
+      <li><strong>Browsing data or analytics cookies</strong> — we do not track you.</li>
+    </ul>
+
+    <h2>Data storage and security</h2>
+    <p>All cloud data is stored on Cloudflare's infrastructure (D1 database and R2 object storage). Your annotations and stories are associated with your account and accessible only with your authenticated session. Photo metadata (timestamps, scene classification tags) remains on your local computer.</p>
+
+    <h2>Data retention</h2>
+    <p>Annotations and stories are retained as long as your account is active. Media files (PDF, audio) are automatically deleted after 7 days. You can request deletion of all your data at any time by contacting us.</p>
+
+    <h2>Third-party services</h2>
+    <p>We use the following third-party services:</p>
+    <ul>
+      <li><strong>Cloudflare</strong> — hosting (D1 database, R2 storage, Workers).</li>
+      <li><strong>Mailtrap</strong> — email delivery (OTP verification and story emails).</li>
+      <li><strong>DeepSeek</strong> — AI story generation. Only your annotations (who, where, event) are sent; no photos are transmitted.</li>
+      <li><strong>Open-Meteo</strong> — historical weather data lookup. Only GPS coordinates are sent; no personal information.</li>
+      <li><strong>Creem</strong> — payment processing. Creem handles all payment data; we never see your credit card.</li>
+    </ul>
+
+    <h2>Your rights</h2>
+    <p>You may request a copy of your data, or full deletion, at any time. Contact us at hello@thatday.vip. We will respond within 48 hours.</p>
+
+    <p class="last-updated">Last updated: July 5, 2026</p>
+  </main>
+</body>
+</html>

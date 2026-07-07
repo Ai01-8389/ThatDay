@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cookie Policy — That Day</title>
+  <link rel="icon" type="image/png" sizes="64x64" href="/icon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700;900&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--paper:#FDFAF4;--ink:#2C2416;--warm:#4A3728;--accent:#C4744F;--muted:#A69B8D;--line:#E8E0D5}
+    body{font-family:'Lora',Georgia,serif;background:var(--paper);color:var(--ink);line-height:1.75}
+    .nav{display:flex;align-items:center;justify-content:space-between;padding:1.5rem 2rem;max-width:1200px;margin:0 auto}
+    .nav-brand{display:flex;align-items:center;gap:.75rem;text-decoration:none;color:var(--ink)}
+    .nav-brand img{width:36px;height:36px;border-radius:8px}
+    .nav-brand span{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700}
+    main{max-width:760px;margin:0 auto;padding:2rem 2rem 5rem}
+    h1{font-family:'Playfair Display',serif;font-size:2.2rem;margin-bottom:2rem}
+    h2{font-family:'Playfair Display',serif;font-size:1.4rem;margin-top:2rem;margin-bottom:.75rem}
+    p,li{color:var(--warm);margin-bottom:1rem;font-size:.95rem}
+    .last-updated{color:var(--muted);font-size:.85rem;margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--line)}
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="/" class="nav-brand"><img src="icon.png" alt="That Day" width="36" height="36"><span>That Day</span></a>
+  </nav>
+  <main>
+    <h1>Cookie Policy</h1>
+    <p>That Day uses minimal cookies — only what is strictly necessary for the service to function.</p>
+
+    <h2>What cookies we use</h2>
+    <p><strong>Authentication token (JWT).</strong> When you log in on our website (thatday.vip), a JSON Web Token is stored in your browser's localStorage. This lets you stay logged in across page visits. It contains your user ID and email address. It is not a tracking cookie — it expires when you log out or after 30 days of inactivity.</p>
+
+    <h2>What we do NOT use</h2>
+    <ul>
+      <li>No advertising cookies</li>
+      <li>No analytics or tracking cookies</li>
+      <li>No third-party cookies</li>
+      <li>No social media cookies</li>
+      <li>No fingerprinting or cross-site tracking</li>
+    </ul>
+
+    <h2>Desktop application</h2>
+    <p>The That Day desktop application stores your authentication token in a local SQLite database on your computer, not in browser cookies. No web cookies are used in the desktop app.</p>
+
+    <h2>How to manage cookies</h2>
+    <p>Since we only use a functional authentication token, disabling storage in your browser would prevent you from logging in to our web pages. The desktop app does not use browser storage.</p>
+
+    <p class="last-updated">Last updated: July 5, 2026</p>
+  </main>
+</body>
+</html>
