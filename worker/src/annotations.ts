@@ -109,3 +109,27 @@ Keep values short (under 60 characters each).`;
     return c.json({ who: "", where: "", event: "" });
   }
 });
+
+// ── POST /annotations/reset ──
+// Reset a date's sealed status, allowing re-annotation and re-seal.
+
+annotations.post("/reset", async (c) => {
+  const userId = c.get("userId") as string;
+  const { calendar_date } = await c.req.json<{ calendar_date?: string }>();
+
+  if (!calendar_date || !/^\d{4}-\d{2}-\d{2}$/.test(calendar_date)) {
+    return c.json({ error: "calendar_date must be YYYY-MM-DD" }, 400);
+  }
+
+  // Reset annotation status to pending
+  const result = await c.env.DB.prepare(
+    `UPDATE daily_annotations SET status = 'pending', updated_at = datetime('now')
+     WHERE user_id = ?1 AND calendar_date = ?2`
+  ).bind(userId, calendar_date).run();
+
+  if (result.meta?.changes === 0) {
+    return c.json({ error: "No annotation found for this date" }, 404);
+  }
+
+  return c.json({ success: true, message: `Reset ${calendar_date} — can re-seal now.` });
+});

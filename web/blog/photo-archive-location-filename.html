@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Why Your Photo Archive Needs Location in the Filename — That Day Blog</title>
+  <meta name="description" content="EXIF metadata is fragile. Burn GPS and date into your filenames with GeoStamp so your photos never lose their identity.">
+  <link rel="icon" type="image/png" sizes="64x64" href="/icon.png">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,500&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--paper:#FDFAF4;--ink:#2C2416;--warm:#4A3728;--accent:#C4744F;--muted:#A69B8D;--line:#E8E0D5;--surface:#FFFBF5}
+    body{font-family:'Lora',Georgia,serif;background:var(--paper);color:var(--ink);line-height:1.75}
+    .nav{display:flex;align-items:center;justify-content:space-between;padding:1.5rem 2rem;max-width:1200px;margin:0 auto}
+    .nav-brand{display:flex;align-items:center;gap:.75rem;text-decoration:none;color:var(--ink)}
+    .nav-brand img{width:36px;height:36px;border-radius:8px}
+    .nav-brand span{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700}
+    .nav-links a{color:var(--warm);text-decoration:none;font-size:.9rem}
+    .nav-links a:hover{color:var(--accent)}
+    main{max-width:740px;margin:0 auto;padding:2rem 2rem 5rem}
+    .post{margin-bottom:2rem}
+    .post-date{color:var(--muted);font-size:.85rem;margin-bottom:.25rem}
+    .post h2{font-family:'Playfair Display',serif;font-size:1.8rem;margin-bottom:1.5rem;line-height:1.3}
+    .post h3{font-family:'Playfair Display',serif;font-size:1.2rem;margin-top:2rem;margin-bottom:.5rem}
+    .post p{color:var(--warm);margin-bottom:1.2rem;font-size:1rem}
+    .post blockquote{font-family:'Playfair Display',serif;font-style:italic;font-size:1.2rem;color:var(--accent);padding:1rem 2rem;border-left:3px solid var(--line);margin:1.5rem 0}
+    .post ul,.post ol{margin:1rem 0 1rem 1.5rem;color:var(--warm)}
+    .post li{margin-bottom:.4rem}
+    .post hr{border:none;border-top:1px solid var(--line);margin:2.5rem 0}
+    .post strong{color:var(--ink)}
+    .post code{background:var(--surface);padding:.15rem .4rem;border-radius:4px;font-size:.88rem;color:var(--accent)}
+    .post table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:.9rem}
+    .post th,.post td{border:1px solid var(--line);padding:.6rem .9rem;text-align:left}
+    .post th{background:var(--surface);font-weight:600}
+    .post pre{background:var(--ink);color:var(--paper);padding:1.2rem 1.5rem;border-radius:8px;overflow-x:auto;font-size:.85rem;line-height:1.6;margin:1.5rem 0}
+    .post pre code{background:none;color:inherit;padding:0}
+    .footer{max-width:740px;margin:0 auto;padding:2rem;border-top:1px solid var(--line);text-align:center}
+    .footer a{color:var(--muted);text-decoration:none;font-size:.85rem}
+    .footer a:hover{color:var(--accent)}
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="/" class="nav-brand"><img src="/icon.png" alt="That Day" width="36" height="36"><span>That Day</span></a>
+    <div class="nav-links"><a href="/blog.html">← Blog</a></div>
+  </nav>
+  <main>
+    <article class="post">
+      <div class="post-date">July 7, 2026</div>
+      <h2>Why Your Photo Archive Needs Location in the Filename</h2>
+      <p>I've been using daily memory apps for a while now. The kind that surfaces photos from "this day last year" and sends you a little story every morning. They're wonderful when they work. But there's a persistent problem I kept running into — and fixing it changed how I manage my entire photo archive.</p>
+      <p>Here's the problem, the fix, and why your filenames matter more than you think.</p>
+      <hr>
+      <h3>The Problem: Your Photos Are Losing Their Identity</h3>
+      <p>Every modern phone embeds GPS coordinates and timestamps into photo files. The data is there — inside the EXIF metadata. Apps like <a href="https://thatday.vip">That Day</a> read this metadata to group photos by calendar date, so you can see what you were doing on July 7th across 2017, 2019, 2022, and 2025 in one view.</p>
+      <p>That works beautifully — <em>until it doesn't</em>.</p>
+      <p>Here's what breaks EXIF metadata:</p>
+      <ul>
+        <li><strong>Messaging apps strip it.</strong> Send a photo through WhatsApp, WeChat, or Telegram, and the GPS data is gone. The timestamp often gets replaced with "date downloaded."</li>
+        <li><strong>Cloud sync services sometimes strip it.</strong> Certain compression settings in Google Photos, iCloud, and Dropbox can strip GPS metadata during backup.</li>
+        <li><strong>File operations can corrupt it.</strong> Copy a file to an external drive, restore from a backup, convert formats — each operation is a chance for metadata to drop or get altered.</li>
+        <li><strong>Screen recording and screenshots.</strong> Zero GPS data. Zero original timestamp.</li>
+      </ul>
+      <p>When EXIF goes missing, your "on this day" app can't place the photo. It becomes a stray file — timestamped with the date you <em>downloaded</em> it, not the date you <em>took</em> it. The app can't group it correctly. Your daily story misses a photo that should have been there.</p>
+      <hr>
+      <h3>The Fix: Burn Identification Into the Filename</h3>
+      <p>The only thing that reliably survives every file operation is the <strong>filename</strong>. Not the metadata. Not the folder structure. The name of the file itself.</p>
+      <p>If your photo is named <code>20260115_38.93_121.60_001.jpg</code>, that name tells you:</p>
+      <ul>
+        <li><code>20260115</code> — January 15, 2026 (machine-parseable date)</li>
+        <li><code>38.93_121.60</code> — Latitude and longitude (GPS coordinates, dot-separated)</li>
+        <li><code>001</code> — Sequence number (preserves shooting order)</li>
+      </ul>
+      <p>This works everywhere. On any operating system. In any backup. On any cloud service. Through any file transfer. The date and location are in the name — permanently.</p>
+      <p>And here's the important part for daily memory apps: <strong>a consistent, parseable date pattern in the filename gives the app a fallback it can always rely on</strong>, even when EXIF is corrupted or absent.</p>
+      <hr>
+      <h3>How GeoStamp Does This Automatically</h3>
+      <p><a href="https://geostamp.top">GeoStamp</a> is a desktop tool designed for exactly this workflow. It reads GPS coordinates and timestamps from your photos and does two things:</p>
+      <p><strong>1. Burns them onto the image</strong> as a visible location stamp (GPS coordinates, city, and date printed on the photo itself)</p>
+      <p><strong>2. Renames the files</strong> using a consistent, descriptive naming convention</p>
+      <p>The naming templates include:</p>
+      <table>
+        <thead><tr><th>Template</th><th>Output Example</th><th>What It Encodes</th></tr></thead>
+        <tbody>
+          <tr><td><code>Date_Serial</code></td><td><code>20260115_001.jpg</code></td><td>Date only</td></tr>
+          <tr><td><code>Date_Coordinates_Serial</code></td><td><code>20260115_38.93_121.60_001.jpg</code></td><td>Date + precise GPS</td></tr>
+          <tr><td><code>Date_City_Serial</code></td><td><code>20260115_Tokyo_001.jpg</code></td><td>Date + location name</td></tr>
+          <tr><td><code>Original</code></td><td>Keeps the camera's original name</td><td>Nothing added</td></tr>
+        </tbody>
+      </table>
+      <p>The <code>Date_Coordinates_Serial</code> format is the gold standard for daily memory apps, because it gives the app two ways to identify the photo:</p>
+      <ol>
+        <li><strong>File name date</strong> — always parseable, always present</li>
+        <li><strong>EXIF date</strong> — when present, confirms accuracy; when absent, the filename is the fallback</li>
+      </ol>
+      <hr>
+      <h3>The Complete Workflow</h3>
+      <p>Here's how I process photos to make sure every daily memory app — including That Day — can always find them:</p>
+      <pre><code>Step 1: Download photos from phone via USB cable
+        (NOT via messaging apps — preserve EXIF)
+
+Step 2: Drop them into GeoStamp
+        ✓ GPS watermarks applied to images
+        ✓ Files renamed: 20260115_38.93_121.60_001.jpg
+
+Step 3: Import into That Day
+        ✓ Scans EXIF for dates → groups by calendar day
+        ✓ Falls back to filename date when EXIF is missing
+        ✓ Every photo is findable, always
+
+Step 4: Add "Who? Where? Doing what?" annotations
+        ✓ AI writes daily story
+        ✓ Voice narration delivered to inbox
+        ✓ PDF keepsake generated</code></pre>
+      <p>The key change is <strong>Step 2</strong>. Before I started renaming files with GeoStamp, That Day would occasionally miss photos because their EXIF had been stripped during transfer. After adopting the date-in-filename convention, that problem disappeared completely.</p>
+      <hr>
+      <h3>Real Example: Why This Matters</h3>
+      <p>Last summer I went on a trip. I took photos with my phone, my friend also took photos on her phone, and we shared photos via AirDrop throughout the day. Everything had GPS — or so I thought.</p>
+      <p>Months later, when I imported everything into my daily memory app, here's what happened:</p>
+      <ul>
+        <li><strong>My phone photos:</strong> Perfect. EXIF intact, appeared on the correct dates.</li>
+        <li><strong>AirDrop'd photos from my friend:</strong> Most worked, but about 20% had slightly shifted timestamps due to timezone differences.</li>
+        <li><strong>Photos that went through messaging apps</strong> (forwarded to a group chat and then saved): GPS gone, timestamp replaced with download date. They appeared on completely wrong dates in the "on this day" view.</li>
+      </ul>
+      <p>If I had GeoStamped them with filenames before importing, every single photo would have carried its shooting date in the name — regardless of what happened to the metadata during transfers.</p>
+      <hr>
+      <h3>Beyond Naming: The Visual Stamp</h3>
+      <p>The filename approach solves the <em>machine-readable</em> problem. But there's also the <em>human-readable</em> problem: when you scroll through 10,000 photos on a TV or share them with family, nobody looks at the filename. They look at the image.</p>
+      <p>GeoStamp's visible watermark layer — GPS coordinates, city name, and date printed on the photo — means that even when you're flipping through photos on a screen that shows no metadata at all, the location is right there. You don't need an app to tell you where a photo was taken. The photo tells you itself.</p>
+      <p>This is especially valuable for the PDF keepsakes that apps like That Day generate. When you print a PDF storybook of your year, the photos inside carry their own context. They don't depend on a footnote or a caption you might forget to write.</p>
+      <hr>
+      <h3>The Setup (Takes 10 Minutes)</h3>
+      <ol>
+        <li>Download <a href="https://geostamp.top">GeoStamp</a></li>
+        <li>Set your naming template to <code>Date_Coordinates_Serial</code> (or <code>Date_City_Serial</code> if you prefer readability over precision)</li>
+        <li>Transfer your photo library from phone to computer via USB (not messaging apps)</li>
+        <li>Batch process your photos — GeoStamp reads EXIF, stamps images, renames files</li>
+        <li>Import the renamed files into your daily memory tool of choice</li>
+      </ol>
+      <p>That's it. From then on, every photo in your archive carries its identity in two permanent places: burned into the image and embedded in the filename. Your daily stories will be complete, accurate, and never miss a photo because of a corrupted EXIF field.</p>
+      <hr>
+      <h3>The Bottom Line</h3>
+      <p>Daily memory apps like <a href="https://thatday.vip">That Day</a> are only as good as the data they can read. EXIF metadata is fragile — it gets stripped, corrupted, and altered in ways you won't notice until a photo shows up on the wrong date.</p>
+      <p>Filenames don't have that problem. A date-and-coordinates filename like <code>20260115_38.93_121.60_001.jpg</code> is readable by any system, survives any transfer, and gives your memory app a reliable anchor even when everything else fails.</p>
+      <p><a href="https://geostamp.top">GeoStamp</a> automates this in one pass — stamp and rename in minutes. It turns your photo library from a pile of fragile metadata into a self-documenting archive that works with any "on this day" tool, today and decades from now.</p>
+      <hr>
+      <p><em>This workflow is tool-agnostic. GeoStamp is the tool I use and recommend for batch GPS processing, but the principle — put the date and location in the filename — applies to any naming tool you choose.</em></p>
+    </article>
+  </main>
+  <div class="footer">
+    <a href="/blog.html">← Back to Blog</a>
+  </div>
+</body>
+</html>

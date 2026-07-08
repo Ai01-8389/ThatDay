@@ -115,33 +115,33 @@ export default {
   },
 };
 
-// ── Morning Cron: generate stories for all pending annotations ──
+// ── Morning Cron: send emails for stories ready to deliver ──
+// Stories are generated at Save/Seal time, Cron only sends emails.
 
 async function morningCron(env: Env, cronUtcHour: number) {
-  if (!env.DEEPSEEK_API_KEY || !env.MAILTRAP_API_KEY) {
-    console.error("Cron skipped: DEEPSEEK_API_KEY or MAILTRAP_API_KEY not configured");
+  if (!env.MAILTRAP_API_KEY) {
+    console.error("Cron skipped: MAILTRAP_API_KEY not configured");
     return;
   }
 
-  // Fetch all pending annotations, joined with user for timezone
+  // Fetch generated (not yet emailed) + pending (old saves, generate now as fallback)
   const { results } = await env.DB.prepare(
     `SELECT da.*, u.utc_offset_minutes, u.email
      FROM daily_annotations da
      JOIN users u ON da.user_id = u.id
-     WHERE da.status = 'pending'
+     WHERE da.status IN ('generated', 'pending')
      ORDER BY da.user_id, da.calendar_date`
   ).all();
 
   if (!results || results.length === 0) {
-    console.log(`No pending annotations for UTC ${cronUtcHour}:00 cron`);
+    console.log(`No generated/pending annotations for UTC ${cronUtcHour}:00 cron`);
     return;
   }
 
   // Filter: only process users whose local time is 7-9 AM right now
   const toProcess: any[] = [];
   for (const row of results as any[]) {
-    const offset = row.utc_offset_minutes ?? 480; // default UTC+8
-    // Convert current UTC hour to user's local hour
+    const offset = row.utc_offset_minutes ?? 480;
     const localHour = (cronUtcHour + Math.floor(offset / 60) + 24) % 24;
     if (localHour >= 7 && localHour <= 9) {
       toProcess.push(row);
@@ -153,55 +153,54 @@ async function morningCron(env: Env, cronUtcHour: number) {
     return;
   }
 
-  console.log(`Processing ${toProcess.length} pending annotations for UTC ${cronUtcHour}:00`);
+  console.log(`Cron: ${toProcess.length} annotations to process for UTC ${cronUtcHour}:00`);
 
   for (const row of toProcess) {
     const userId = row.user_id;
 
-    // Mark processing
-    await env.DB.prepare(
-      "UPDATE daily_annotations SET status = 'processing', updated_at = datetime('now') WHERE id = ?1"
-    ).bind(row.id).run();
-
     try {
-      // Generate story
-      const storyResult = await generateStory(env as any, row);
+      let storyRow: any;
 
-      // Save to stories table
-      const storyId = crypto.randomUUID();
-      await env.DB.prepare(
-        `INSERT INTO stories (id, user_id, calendar_date, title, content, photos_json)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6)
-         ON CONFLICT(user_id, calendar_date) DO UPDATE SET
-           title = excluded.title,
-           content = excluded.content,
-           photos_json = excluded.photos_json`
-      ).bind(storyId, userId, row.calendar_date, storyResult.title, storyResult.content, row.photos_json).run();
+      if (row.status === 'generated') {
+        // Story already generated — just send email
+        storyRow = await env.DB.prepare(
+          "SELECT id, title, content, calendar_date FROM stories WHERE user_id = ?1 AND calendar_date = ?2"
+        ).bind(userId, row.calendar_date).first();
+      }
+
+      if (!storyRow && row.status === 'pending') {
+        // Fallback: old Save without generation — generate now
+        if (!env.DEEPSEEK_API_KEY) continue;
+        await env.DB.prepare(
+          "UPDATE daily_annotations SET status = 'processing', updated_at = datetime('now') WHERE id = ?1"
+        ).bind(row.id).run();
+
+        const storyResult = await generateStory(env as any, row);
+        const storyId = crypto.randomUUID();
+        await env.DB.prepare(
+          `INSERT INTO stories (id, user_id, calendar_date, title, content, photos_json)
+           VALUES (?1, ?2, ?3, ?4, ?5, ?6)
+           ON CONFLICT(user_id, calendar_date) DO UPDATE SET
+             title = excluded.title, content = excluded.content, photos_json = excluded.photos_json`
+        ).bind(storyId, userId, row.calendar_date, storyResult.title, storyResult.content, row.photos_json).run();
+        storyRow = { id: storyId, title: storyResult.title, content: storyResult.content, calendar_date: row.calendar_date };
+      }
+
+      if (!storyRow) continue;
 
       // Send email
-      const emailSent = await sendStoryEmail(env as any, userId, {
-        id: storyId,
-        title: storyResult.title,
-        content: storyResult.content,
-        calendar_date: row.calendar_date,
-      });
+      const emailSent = await sendStoryEmail(env as any, userId, storyRow);
 
       if (emailSent) {
         await env.DB.prepare(
           "UPDATE daily_annotations SET status = 'sent', updated_at = datetime('now') WHERE id = ?1"
         ).bind(row.id).run();
-        console.log(`Story sent for user ${userId}, date ${row.calendar_date}`);
+        console.log(`Email sent for user ${userId}, date ${row.calendar_date}`);
       } else {
-        await env.DB.prepare(
-          "UPDATE daily_annotations SET status = 'sending_failed', updated_at = datetime('now') WHERE id = ?1"
-        ).bind(row.id).run();
         console.error(`Email failed for user ${userId}, date ${row.calendar_date}`);
       }
     } catch (err: any) {
-      console.error(`Story generation failed for user ${userId}:`, err.message);
-      await env.DB.prepare(
-        "UPDATE daily_annotations SET status = 'sending_failed', updated_at = datetime('now') WHERE id = ?1"
-      ).bind(row.id).run();
+      console.error(`Cron failed for user ${userId}, date ${row.calendar_date}:`, err.message);
     }
   }
 }

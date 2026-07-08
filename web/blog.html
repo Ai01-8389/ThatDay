@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,500&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{--paper:#FDFAF4;--ink:#2C2416;--warm:#4A3728;--accent:#C4744F;--muted:#A69B8D;--line:#E8E0D5}
+    :root{--paper:#FDFAF4;--ink:#2C2416;--warm:#4A3728;--accent:#C4744F;--muted:#A69B8D;--line:#E8E0D5;--surface:#FFFBF5}
     body{font-family:'Lora',Georgia,serif;background:var(--paper);color:var(--ink);line-height:1.75}
     .nav{display:flex;align-items:center;justify-content:space-between;padding:1.5rem 2rem;max-width:1200px;margin:0 auto}
     .nav-brand{display:flex;align-items:center;gap:.75rem;text-decoration:none;color:var(--ink)}
@@ -19,19 +19,17 @@
     .nav-links a:hover{color:var(--accent)}
     main{max-width:740px;margin:0 auto;padding:2rem 2rem 5rem}
     h1{font-family:'Playfair Display',serif;font-size:2.2rem;margin-bottom:2.5rem}
-
-    .post{ margin-bottom:4rem; }
-    .post-date{color:var(--muted);font-size:.85rem;margin-bottom:.25rem}
-    .post h2{font-family:'Playfair Display',serif;font-size:1.6rem;margin-bottom:1rem;line-height:1.3}
-    .post h2 a{color:var(--ink);text-decoration:none}
-    .post h2 a:hover{color:var(--accent)}
-    .post h3{font-family:'Playfair Display',serif;font-size:1.2rem;margin-top:2rem;margin-bottom:.5rem}
-    .post p{color:var(--warm);margin-bottom:1.2rem;font-size:1rem}
-    .post blockquote{
-      font-family:'Playfair Display',serif;font-style:italic;font-size:1.2rem;
-      color:var(--accent);padding:1rem 2rem;border-left:3px solid var(--line);
-      margin: 1.5rem 0;
-    }
+    .post-list{list-style:none;margin:0;padding:0}
+    .post-item{padding:1.5rem 0;border-bottom:1px solid var(--line)}
+    .post-item:first-child{padding-top:0}
+    .post-item:last-child{border-bottom:none}
+    .post-item-date{color:var(--muted);font-size:.8rem;margin-bottom:.2rem}
+    .post-item h2{font-family:'Playfair Display',serif;font-size:1.4rem;margin-bottom:.4rem;line-height:1.3}
+    .post-item h2 a{color:var(--ink);text-decoration:none;transition:color .2s}
+    .post-item h2 a:hover{color:var(--accent)}
+    .post-item .excerpt{color:var(--warm);font-size:.95rem;line-height:1.6}
+    .post-item .read-more{color:var(--accent);font-size:.85rem;text-decoration:none;display:inline-block;margin-top:.4rem}
+    .post-item .read-more:hover{text-decoration:underline}
     .footer{max-width:740px;margin:0 auto;padding:2rem;border-top:1px solid var(--line);text-align:center}
     .footer a{color:var(--muted);text-decoration:none;font-size:.85rem}
     .footer a:hover{color:var(--accent)}
@@ -39,46 +37,51 @@
 </head>
 <body>
   <nav class="nav">
-    <a href="/" class="nav-brand"><img src="icon.png" alt="That Day" width="36" height="36"><span>That Day</span></a>
+    <a href="/" class="nav-brand"><img src="/icon.png" alt="That Day" width="36" height="36"><span>That Day</span></a>
     <div class="nav-links"><a href="/">← Home</a></div>
   </nav>
 
   <main>
     <h1>Blog</h1>
 
-    <article class="post">
-      <div class="post-date">July 5, 2026</div>
-      <h2><a href="#">Why I Built That Day</a></h2>
+    <ul class="post-list">
 
-      <p>I have thousands of photos. You probably do too. They sit on hard drives, backed up and forgotten, organized by folders like "2023 Summer" and "Phone Backup March." Every once in a while I scroll through them and think: <em>what was I doing on this day, three years ago? Five years ago?</em></p>
+      <li class="post-item">
+        <div class="post-item-date">July 7, 2026</div>
+        <h2><a href="/blog/memory-loss-mild-alzheimers.html">When Memories Start to Fade, Photos Can Help Bring Them Back</a></h2>
+        <p class="excerpt">My father was diagnosed with mild cognitive impairment two years ago. But show him a photo from 1987 — and he'll tell you the name of the street, the neighbor's dog, and what they were cooking for dinner. The memory is still there. Finding the door to it is the hard part.</p>
+        <a href="/blog/memory-loss-mild-alzheimers.html" class="read-more">Read more →</a>
+      </li>
 
-      <p>The phone will show me "On This Day" — one photo from one year. That's not enough. I want to see July 4th in 2018, 2020, 2022, 2023 — all at once. I want to know who I was with, where we were, what the weather was like. I want a story, not just a thumbnail.</p>
+      <li class="post-item">
+        <div class="post-item-date">July 7, 2026</div>
+        <h2><a href="/blog/loneliness-morning-email.html">A Single Email Every Morning When No One Else Is Around</a></h2>
+        <p class="excerpt">There's a specific kind of loneliness that hits hardest in the morning. What I didn't expect was that the thing that helped most wouldn't be a person — it would be an email from a machine, reading my own life back to me.</p>
+        <a href="/blog/loneliness-morning-email.html" class="read-more">Read more →</a>
+      </li>
 
-      <blockquote>"A photo without context is just a file. Context turns it into a memory."</blockquote>
+      <li class="post-item">
+        <div class="post-item-date">July 7, 2026</div>
+        <h2><a href="/blog/empty-nest-parents-child-far.html">When Your Child Lives in Another City, Every Morning Brings a Memory of Them</a></h2>
+        <p class="excerpt">My son moved to Shanghai three years ago. We talk on video calls every Sunday. But between those calls, there's silence. I didn't expect a photo app to change any of that. But it did — in the small, daily way that matters most.</p>
+        <a href="/blog/empty-nest-parents-child-far.html" class="read-more">Read more →</a>
+      </li>
 
-      <h3>Not another journal app</h3>
-      <p>There are great journaling apps. Day One is beautiful. But they ask you to <em>write</em>. Every day. Most of us don't. What if the app could do the writing for you — using the data already in your photos?</p>
+      <li class="post-item">
+        <div class="post-item-date">July 7, 2026</div>
+        <h2><a href="/blog/photo-archive-location-filename.html">Why Your Photo Archive Needs Location in the Filename</a></h2>
+        <p class="excerpt">EXIF metadata is fragile — messaging apps strip it, cloud sync corrupts it, file transfers drop it. The fix: burn the date and GPS coordinates directly into your filenames. Here's how GeoStamp makes it automatic.</p>
+        <a href="/blog/photo-archive-location-filename.html" class="read-more">Read more →</a>
+      </li>
 
-      <p>Your photos contain dates, times, and sometimes GPS coordinates. If you add three words per photo — who you were with, where, and what you were doing — that's enough for an AI to write a warm, personal story about your day. Not fiction. A faithful retelling built entirely on your annotations.</p>
+      <li class="post-item">
+        <div class="post-item-date">July 5, 2026</div>
+        <h2><a href="/blog/why-i-built-that-day.html">Why I Built That Day</a></h2>
+        <p class="excerpt">I have thousands of photos. You probably do too. They sit on hard drives, backed up and forgotten. I want to see July 4th in 2018, 2020, 2022, 2023 — all at once. I want a story, not just a thumbnail.</p>
+        <a href="/blog/why-i-built-that-day.html" class="read-more">Read more →</a>
+      </li>
 
-      <h3>Why desktop, not mobile</h3>
-      <p>Your photo library lives on your computer. Uploading a decade of personal photos to a cloud service is a privacy disaster waiting to happen. That Day runs locally. It scans your drives, reads EXIF data, generates thumbnails — all on your machine. Your photos never leave. Only the annotations and stories sync to the cloud.</p>
-
-      <h3>What That Day is</h3>
-      <p>That Day is a personal historian. It works like this:</p>
-      <p>1. Scan your photos — it finds every image across every drive, reads dates, groups them by calendar day across every year.</p>
-      <p>2. Annotate — three words per photo. Or speak them. The AI fills in the blanks.</p>
-      <p>3. Seal — your annotations are saved, a story is generated, audio is created, a PDF is made.</p>
-      <p>4. Wake up — every morning at 8, your story arrives by email. Read it or listen.</p>
-
-      <h3>What That Day is not</h3>
-      <p>It's not another cloud photo backup. It's not a social network. It's not an AI that invents things you didn't do. Every word in your story comes from your annotations, your dates, your places, and (when GPS is available) your weather. The AI connects the dots. It doesn't make them up.</p>
-
-      <h3>The name</h3>
-      <p>Every day is <em>that day</em>. The one you forget until something reminds you. A smell. A song. A photo. That Day is that reminder — but daily, systematic, across your entire life.</p>
-
-      <p>I built this for myself. I hope it's useful for you too.</p>
-    </article>
+    </ul>
   </main>
 
   <div class="footer">

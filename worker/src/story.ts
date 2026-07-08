@@ -45,12 +45,11 @@ export async function generateStory(
   }
 
   // ── Extract date facts ──
-  const [yearStr, monthStr] = row.calendar_date.split("-");
+  const [yearStr, monthStr, dayStr] = row.calendar_date.split("-");
   const month = parseInt(monthStr);
   const season = month ? getSeason(month) : "";
 
   // ── Best-effort weather (2-level fallback) ──
-  let weatherInfo = "";
   let weatherCoords: { lat: number; lon: number } | null = null;
 
   const photoWithGps = photos.find((p: any) => p.gps?.lat && p.gps?.lon);
@@ -63,10 +62,18 @@ export async function generateStory(
       try { weatherCoords = await geocodePlace(wherePlace); } catch { /* skip */ }
     }
   }
+
+  // ── Fetch per-year weather (each year gets its own historical weather) ──
+  const weatherByYear: Record<string, string> = {};
   if (weatherCoords) {
-    try {
-      weatherInfo = await fetchWeather(weatherCoords.lat, weatherCoords.lon, row.calendar_date);
-    } catch { /* skip */ }
+    const years = [...new Set(photos.map((p: any) => p.time?.slice(0, 4)).filter(Boolean))] as string[];
+    for (const y of years) {
+      const dateForYear = `${y}-${monthStr}-${dayStr}`;
+      try {
+        const w = await fetchWeather(weatherCoords.lat, weatherCoords.lon, dateForYear);
+        if (w) weatherByYear[y] = w;
+      } catch { /* skip this year */ }
+    }
   }
 
   // ── Context: group by year, use time-of-day labels, no date repetition ──
@@ -90,8 +97,11 @@ export async function generateStory(
     byYear[y].push(`  - ${parts.join(", ")}`);
   }
 
-  const years = Object.keys(byYear).sort();
-  const contextLines = years.map(y => `${y}:${weatherInfo ? ` (${weatherInfo})` : ""}\n${byYear[y].join("\n")}`).join("\n\n");
+  const sortedYears = Object.keys(byYear).sort();
+  const contextLines = sortedYears.map(y => {
+    const w = weatherByYear[y];
+    return `${y}:${w ? ` (${w})` : ""}\n${byYear[y].join("\n")}`;
+  }).join("\n\n");
 
   const systemPrompt = `You help people recall their memories. That Day shows photos from 
 "on this day" across many years. The user annotated each photo with who, where, 
@@ -279,21 +289,23 @@ function weatherDesc(code: number): string {
 }
 
 // ── POST /generate-story ──
-// Manual trigger from desktop ("封存今天")
+// Manual trigger from desktop.
+//   Seal Today: generates story + will send email separately via /send-story
+//   Save flow:  no_email=true → story generated, status='generated', Cron emails later.
 
 story.post("/generate-story", async (c) => {
   const userId = c.get("userId") as string;
-  const { calendar_date } = await c.req.json<{ calendar_date?: string }>();
+  const { calendar_date, no_email } = await c.req.json<{ calendar_date?: string; no_email?: boolean }>();
 
   // Find pending annotation for this user, optionally filtered by date
   const row = await c.env.DB.prepare(
     calendar_date
-      ? `SELECT * FROM daily_annotations WHERE user_id = ?1 AND status = 'pending' AND calendar_date = ?2 LIMIT 1`
-      : `SELECT * FROM daily_annotations WHERE user_id = ?1 AND status = 'pending' ORDER BY calendar_date DESC LIMIT 1`
+      ? `SELECT * FROM daily_annotations WHERE user_id = ?1 AND status IN ('pending','generated') AND calendar_date = ?2 LIMIT 1`
+      : `SELECT * FROM daily_annotations WHERE user_id = ?1 AND status IN ('pending','generated') ORDER BY calendar_date DESC LIMIT 1`
   ).bind(userId, ...(calendar_date ? [calendar_date] : [])).first<AnnotationRow>();
 
   if (!row) {
-    return c.json({ error: "No pending annotations found" }, 404);
+    return c.json({ error: "No pending/generated annotations found" }, 404);
   }
 
   // Mark processing
@@ -315,10 +327,11 @@ story.post("/generate-story", async (c) => {
          photos_json = excluded.photos_json`
     ).bind(storyId, userId, row.calendar_date, story.title, story.content, row.photos_json).run();
 
-    // Mark annotation as sent
+    // Mark annotation: 'generated' if no_email (Save flow), 'sent' otherwise (Seal flow)
+    const newStatus = no_email ? 'generated' : 'sent';
     await c.env.DB.prepare(
-      "UPDATE daily_annotations SET status = 'sent', updated_at = datetime('now') WHERE id = ?1"
-    ).bind(row.id).run();
+      `UPDATE daily_annotations SET status = ?1, updated_at = datetime('now') WHERE id = ?2`
+    ).bind(newStatus, row.id).run();
 
     return c.json({
       success: true,
