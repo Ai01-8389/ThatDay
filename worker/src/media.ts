@@ -1,12 +1,9 @@
 import { Hono } from "hono";
-import type { R2Bucket, R2Object } from "@cloudflare/workers-types";
+import type { R2Object } from "@cloudflare/workers-types";
+import type { Env, Variables } from "./types";
 import { authMiddleware } from "./auth";
 
-interface MediaBindings {
-  R2: R2Bucket;
-}
-
-export const media = new Hono<{ Bindings: MediaBindings }>();
+export const media = new Hono<{ Bindings: Env; Variables: Variables }>();
 
 // ── POST /media/upload ──
 // Upload PDF + WAV for a date. JWT required.

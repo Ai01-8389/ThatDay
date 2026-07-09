@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import type { D1Database, R2Bucket } from "@cloudflare/workers-types";
+import type { Env, Variables } from "./types";
 import { auth, authMiddleware } from "./auth";
 import { annotations } from "./annotations";
 import { story, generateStory } from "./story";
@@ -9,22 +9,7 @@ import { sendStoryEmail } from "./email";
 import { media } from "./media";
 
 // ── Types ──
-
-interface Env {
-  DB: D1Database;
-  R2: R2Bucket;
-  JWT_SECRET: string;
-  MAILTRAP_API_KEY?: string;
-  DEEPSEEK_API_KEY?: string;
-  CREEM_WEBHOOK_SECRET?: string;
-  SUPER_ACCOUNTS?: string;
-}
-
-type Variables = {
-  userId: string;
-  userEmail: string;
-  userTier: string;
-};
+// Env / Variables are defined in ./types and shared across all routes.
 
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
 
@@ -129,7 +114,7 @@ async function morningCron(env: Env, cronUtcHour: number) {
     `SELECT da.*, u.utc_offset_minutes, u.email
      FROM daily_annotations da
      JOIN users u ON da.user_id = u.id
-     WHERE da.status IN ('generated', 'pending')
+     WHERE da.status IN ('generated', 'pending', 'sending_failed')
      ORDER BY da.user_id, da.calendar_date`
   ).all();
 
@@ -168,14 +153,14 @@ async function morningCron(env: Env, cronUtcHour: number) {
         ).bind(userId, row.calendar_date).first();
       }
 
-      if (!storyRow && row.status === 'pending') {
-        // Fallback: old Save without generation — generate now
+      if (!storyRow && (row.status === 'pending' || row.status === 'sending_failed')) {
+        // Fallback: old Save without generation or previous failure — generate now
         if (!env.DEEPSEEK_API_KEY) continue;
         await env.DB.prepare(
           "UPDATE daily_annotations SET status = 'processing', updated_at = datetime('now') WHERE id = ?1"
         ).bind(row.id).run();
 
-        const storyResult = await generateStory(env as any, row);
+        const storyResult = await generateStory(env, row);
         const storyId = crypto.randomUUID();
         await env.DB.prepare(
           `INSERT INTO stories (id, user_id, calendar_date, title, content, photos_json)
@@ -189,7 +174,7 @@ async function morningCron(env: Env, cronUtcHour: number) {
       if (!storyRow) continue;
 
       // Send email
-      const emailSent = await sendStoryEmail(env as any, userId, storyRow);
+      const emailSent = await sendStoryEmail(env, userId, storyRow);
 
       if (emailSent) {
         await env.DB.prepare(

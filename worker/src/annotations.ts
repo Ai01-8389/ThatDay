@@ -1,10 +1,5 @@
 import { Hono } from "hono";
-import type { D1Database } from "@cloudflare/workers-types";
-
-interface AnnotationsBindings {
-  DB: D1Database;
-  DEEPSEEK_API_KEY?: string;
-}
+import type { Env, Variables } from "./types";
 
 export interface PhotoAnnotation {
   time: string;          // ISO timestamp
@@ -17,7 +12,7 @@ export interface PhotoAnnotation {
   time_of_day?: string;  // EXIF derived
 }
 
-export const annotations = new Hono<{ Bindings: AnnotationsBindings }>();
+export const annotations = new Hono<{ Bindings: Env; Variables: Variables }>();
 
 // ── PUT /annotations ──
 // Receives daily annotations from desktop (upsert, one row per user per day)

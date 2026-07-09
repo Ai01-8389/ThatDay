@@ -1,11 +1,6 @@
 import { Hono } from "hono";
-import type { D1Database } from "@cloudflare/workers-types";
+import type { Env, Variables } from "./types";
 import { authMiddleware } from "./auth";
-
-interface StoryBindings {
-  DB: D1Database;
-  DEEPSEEK_API_KEY?: string;
-}
 
 interface AnnotationRow {
   id: string;
@@ -15,7 +10,7 @@ interface AnnotationRow {
   status: string;
 }
 
-export const story = new Hono<{ Bindings: StoryBindings }>();
+export const story = new Hono<{ Bindings: Env; Variables: Variables }>();
 
 // Apply auth middleware directly within this sub-router for all /stories routes
 story.use("/stories/*", authMiddleware);
@@ -25,7 +20,7 @@ story.use("/send-story", authMiddleware);
 // ── Shared: AI story generation (used by /generate-story and Cron) ──
 
 export async function generateStory(
-  env: StoryBindings,
+  env: Env,
   row: AnnotationRow
 ): Promise<{ title: string; content: string }> {
   const apiKey = env.DEEPSEEK_API_KEY;
@@ -130,7 +125,7 @@ Rules:
 
   const userPrompt = `Write warm memory vignettes for these photos, one section per year. Use only the provided annotations:
 
-${row.calendar_date} weather: ${weatherInfo || "unknown"}
+${row.calendar_date}
 ${contextLines}`;
 
   const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
@@ -153,7 +148,7 @@ ${contextLines}`;
   if (!response.ok) {
     const errText = await response.text();
     console.error("DeepSeek story error:", errText);
-    throw new Error(`DeepSeek API error: ${response.status}`);
+    throw new Error(`DeepSeek ${response.status}: ${errText.slice(0, 200)}`);
   }
 
   const data: any = await response.json();
@@ -297,11 +292,11 @@ story.post("/generate-story", async (c) => {
   const userId = c.get("userId") as string;
   const { calendar_date, no_email } = await c.req.json<{ calendar_date?: string; no_email?: boolean }>();
 
-  // Find pending annotation for this user, optionally filtered by date
+  // Find pending/generated/sending_failed annotation for this user, optionally filtered by date
   const row = await c.env.DB.prepare(
     calendar_date
-      ? `SELECT * FROM daily_annotations WHERE user_id = ?1 AND status IN ('pending','generated') AND calendar_date = ?2 LIMIT 1`
-      : `SELECT * FROM daily_annotations WHERE user_id = ?1 AND status IN ('pending','generated') ORDER BY calendar_date DESC LIMIT 1`
+      ? `SELECT * FROM daily_annotations WHERE user_id = ?1 AND status IN ('pending','generated','sending_failed') AND calendar_date = ?2 LIMIT 1`
+      : `SELECT * FROM daily_annotations WHERE user_id = ?1 AND status IN ('pending','generated','sending_failed') ORDER BY calendar_date DESC LIMIT 1`
   ).bind(userId, ...(calendar_date ? [calendar_date] : [])).first<AnnotationRow>();
 
   if (!row) {
@@ -342,13 +337,13 @@ story.post("/generate-story", async (c) => {
       },
     });
   } catch (err: any) {
-    // Mark failed for retry
+    // Only mark failed if currently processing — don't overwrite 'generated' or 'sent'
     await c.env.DB.prepare(
-      "UPDATE daily_annotations SET status = 'sending_failed', updated_at = datetime('now') WHERE id = ?1"
+      "UPDATE daily_annotations SET status = 'sending_failed', updated_at = datetime('now') WHERE id = ?1 AND status = 'processing'"
     ).bind(row.id).run();
 
     console.error("Story generation failed:", err.message);
-    return c.json({ error: "Story generation failed, will retry" }, 500);
+    return c.json({ error: `Story generation failed: ${err.message}` }, 500);
   }
 });
 

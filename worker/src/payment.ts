@@ -1,10 +1,5 @@
 import { Hono } from "hono";
-import type { D1Database } from "@cloudflare/workers-types";
-
-interface PaymentBindings {
-  DB: D1Database;
-  CREEM_WEBHOOK_SECRET?: string;
-}
+import type { Env } from "./types";
 
 interface WebhookPayload {
   type: string;
@@ -16,7 +11,7 @@ interface WebhookPayload {
   };
 }
 
-export const payment = new Hono<{ Bindings: PaymentBindings }>();
+export const payment = new Hono<{ Bindings: Env }>();
 
 /**
  * POST /payment/webhook — Creem payment events

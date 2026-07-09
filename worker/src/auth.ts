@@ -1,13 +1,6 @@
 import { Hono } from "hono";
 import { SignJWT, jwtVerify } from "jose";
-import type { D1Database } from "@cloudflare/workers-types";
-
-export interface AuthBindings {
-  DB: D1Database;
-  JWT_SECRET: string;
-  MAILTRAP_API_KEY?: string;
-  SUPER_ACCOUNTS?: string;
-}
+import type { Env, Variables } from "./types";
 
 interface UserRow {
   id: string;
@@ -15,7 +8,7 @@ interface UserRow {
   tier: string;
 }
 
-export const auth = new Hono<{ Bindings: AuthBindings }>();
+export const auth = new Hono<{ Bindings: Env; Variables: Variables }>();
 
 // ── Utilities ──
 
@@ -29,14 +22,14 @@ function validateEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-function getSecret(env: AuthBindings): Uint8Array {
+function getSecret(env: Env): Uint8Array {
   return new TextEncoder().encode(env.JWT_SECRET);
 }
 
 // ── JWT (30 天过期，路线 B) ──
 
 export async function signJwt(
-  env: AuthBindings,
+  env: Env,
   user: { id: string; email: string; tier: string }
 ): Promise<string> {
   return new SignJWT({ sub: user.id, email: user.email, tier: user.tier })
@@ -48,7 +41,7 @@ export async function signJwt(
 
 export async function verifyJwt(
   token: string,
-  env: AuthBindings
+  env: Env
 ): Promise<{ sub: string; email: string; tier: string } | null> {
   try {
     const { payload } = await jwtVerify(token, getSecret(env));

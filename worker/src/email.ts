@@ -1,9 +1,4 @@
-import type { D1Database } from "@cloudflare/workers-types";
-
-interface EmailEnv {
-  DB: D1Database;
-  MAILTRAP_API_KEY?: string;
-}
+import type { Env } from "./types";
 
 interface StoryRow {
   id: string;
@@ -25,7 +20,7 @@ function base64urlEncode(str: string): string {
  * Called by both manual /send-story and Cron.
  */
 export async function sendStoryEmail(
-  env: EmailEnv,
+  env: Env,
   userId: string,
   story: StoryRow,
   audioUrl?: string,
