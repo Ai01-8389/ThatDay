@@ -1,7 +1,8 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
+  import { listStories } from "./api";
 
-  let { token: _token, onBack }: { token?: string; onBack: () => void } = $props();
+  let { token = "", onBack }: { token?: string; onBack: () => void } = $props();
 
   interface StoryItem {
     calendar_date: string;
@@ -50,6 +51,30 @@
     error = "";
     try {
       stories = await invoke<StoryItem[]>("get_stories", { limit: 50 });
+
+      // Sync: fetch Worker stories, cache any missing ones locally
+      if (token) {
+        try {
+          const remote = await listStories(token, 50);
+          if (remote?.stories?.length) {
+            const localDates = new Set(stories.map(s => s.calendar_date));
+            for (const s of remote.stories) {
+              if (!localDates.has(s.calendar_date)) {
+                await invoke("save_story", {
+                  date: s.calendar_date,
+                  title: s.title,
+                  content: s.content,
+                });
+              }
+            }
+            // Re-fetch local to include newly saved stories
+            stories = await invoke<StoryItem[]>("get_stories", { limit: 50 });
+          }
+        } catch (_) {
+          // Worker fetch is best-effort; local stories are still displayed
+        }
+      }
+
       // P1: pre-classify next 7 days in background
       preclassifyNearby().catch(() => {});
     } catch (e: any) {

@@ -123,12 +123,17 @@ async function morningCron(env: Env, cronUtcHour: number) {
     return;
   }
 
-  // Filter: only process users whose local time is 7-9 AM right now
+  // Filter: only process users whose local time is 7-9 AM AND whose
+  // calendar_date matches today in the user's local timezone
   const toProcess: any[] = [];
   for (const row of results as any[]) {
     const offset = row.utc_offset_minutes ?? 480;
     const localHour = (cronUtcHour + Math.floor(offset / 60) + 24) % 24;
     if (localHour >= 7 && localHour <= 9) {
+      const utcNow = new Date();
+      const userNow = new Date(utcNow.getTime() + offset * 60 * 1000);
+      const userToday = userNow.toISOString().slice(0, 10); // YYYY-MM-DD
+      if (row.calendar_date !== userToday) continue;
       toProcess.push(row);
     }
   }
