@@ -45,7 +45,8 @@
   let scanStatus = $state("");
   let scanDropdownOpen = $state(false);
   let datePickerOpen = $state(false);
-  let today = $state(new Date().toISOString().slice(0, 10));
+  const now = new Date();
+  let today = $state(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`);
   let todayMD = $derived(today.slice(5)); // "06-30" from "2026-06-30"
   let currentDate = $state(todayMD);
   let availableDates: string[] = $state([]);
@@ -1449,6 +1450,14 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.2s ease, z-index 0s;
+  }
+  .photo-thumb:hover img {
+    transform: scale(4);
+    z-index: 50;
+    position: relative;
+    border-radius: 3px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.35);
   }
 
   .photo-time {

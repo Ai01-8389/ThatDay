@@ -113,7 +113,8 @@ pub fn generate(
         for photo in &photos {
             let thumb_path = thumb_dir.join(format!("{}.jpg", photo.file_path_hash));
             if thumb_path.exists() {
-                if let Ok(img) = elements::Image::from_path(&thumb_path) {
+                if let Ok(mut img) = elements::Image::from_path(&thumb_path) {
+                    img.set_dpi(96.0); // scale thumb ~3x (300px @ 300dpi → ~900px display)
                     doc.push(img);
                     let cap = build_caption(photo);
                     if !cap.is_empty() {
