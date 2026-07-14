@@ -7,6 +7,7 @@
 //! Output: Documents/That Day Stories/YYYY-MM-DD.pdf
 
 use crate::db::get_db;
+use crate::scanner::dedup::{compute_ahash, hamming_distance};
 use genpdf::{elements, fonts, style, Alignment, Element, SimplePageDecorator};
 use std::path::{Path, PathBuf};
 
@@ -99,8 +100,11 @@ pub fn generate(
     push_br(&mut doc, 35);
 
     // ── Body ──
-    let photos = load_photos(app_dir, date)?;
+    let mut photos = load_photos(app_dir, date)?;
     let thumb_dir = app_dir.join("thumbnails");
+
+    // Dedup burst + visually similar photos (30s window + aHash)
+    photos = dedup_photos(photos, &thumb_dir);
 
     // Logo in top-right of body page
     push_text(&mut doc, BRAND, 10, Alignment::Right, true);
@@ -235,4 +239,74 @@ fn format_date(date_str: &str) -> String {
     } else {
         date_str.to_string()
     }
+}
+
+// ── Photo dedup for PDF display ──
+
+fn dedup_photos(photos: Vec<PdfPhoto>, thumb_dir: &Path) -> Vec<PdfPhoto> {
+    if photos.len() <= 1 { return photos; }
+    let mut sorted = photos;
+    sorted.sort_by_key(|p| p.taken_at.unwrap_or(i64::MAX));
+
+    let mut groups: Vec<Vec<PdfPhoto>> = Vec::new();
+    for p in sorted {
+        if let Some(last_group) = groups.last_mut() {
+            if let (Some(cur_ts), Some(last_ts)) = (p.taken_at, last_group.last().and_then(|lp| lp.taken_at)) {
+                if cur_ts - last_ts <= 30 {
+                    last_group.push(p);
+                    continue;
+                }
+            }
+        }
+        groups.push(vec![p]);
+    }
+
+    let mut result = Vec::new();
+    for group in groups {
+        if group.len() <= 1 {
+            result.extend(group);
+        } else {
+            result.extend(dedup_group_a(group, thumb_dir));
+        }
+    }
+    result
+}
+
+fn dedup_group_a(group: Vec<PdfPhoto>, thumb_dir: &Path) -> Vec<PdfPhoto> {
+    let hashed: Vec<(PdfPhoto, Option<u64>)> = group
+        .into_iter()
+        .map(|p| {
+            let thumb = thumb_dir.join(format!("{}.jpg", p.file_path_hash));
+            let h = compute_ahash(&thumb.to_string_lossy());
+            (p, h)
+        })
+        .collect();
+
+    let mut kept = vec![true; hashed.len()];
+    for i in 0..hashed.len() {
+        if !kept[i] { continue; }
+        for j in (i+1)..hashed.len() {
+            if !kept[j] { continue; }
+            if let (Some(hi), Some(hj)) = (hashed[i].1, hashed[j].1) {
+                if hamming_distance(hi, hj) <= 5 {
+                    let si = anno_score(&hashed[i].0);
+                    let sj = anno_score(&hashed[j].0);
+                    if sj > si { kept[i] = false; } else { kept[j] = false; }
+                }
+            }
+        }
+    }
+
+    hashed.into_iter().enumerate()
+        .filter(|(i, _)| kept[*i])
+        .map(|(_, (p, _))| p)
+        .collect()
+}
+
+fn anno_score(p: &PdfPhoto) -> u32 {
+    let mut s = 0u32;
+    if p.who.is_some() { s += 1; }
+    if p.where_place.is_some() { s += 1; }
+    if p.event.is_some() { s += 1; }
+    s
 }

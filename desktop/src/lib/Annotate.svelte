@@ -225,8 +225,8 @@
       }
     }
 
-    // Sort years newest first
-    const years = [...byYear.keys()].sort((a, b) => b - a);
+    // Sort years oldest first
+    const years = [...byYear.keys()].sort((a, b) => a - b);
 
     const groups: { label: string; photos: Photo[] }[] = [];
     for (const year of years) {
@@ -263,7 +263,7 @@
     return !!(ann && ann.who);
   }
 
-  /// Lightweight burst dedup: group by time gap ≤ 10s, keep largest file per group.
+  /// Lightweight burst dedup: group by time gap ≤ 30s, keep most-annotated photo per group.
   function dedupBurstLight(photos: Photo[]): Photo[] {
     const sorted = [...photos].sort((a, b) => (a.taken_at || 0) - (b.taken_at || 0));
     const groups: Photo[][] = [];
@@ -271,15 +271,26 @@
       const last = groups[groups.length - 1];
       if (last && p.taken_at && last[last.length - 1].taken_at) {
         const gap = p.taken_at - last[last.length - 1].taken_at!;
-        if (gap <= 10) { last.push(p); continue; }
+        if (gap <= 30) { last.push(p); continue; }
       }
       groups.push([p]);
     }
     return groups.map(g => {
       if (g.length <= 1) return g[0];
-      // Keep the largest file in the burst
-      return g.reduce((best, cur) => (cur.file_size || 0) > (best.file_size || 0) ? cur : best);
+      return g.reduce((best, cur) => annotationScore(cur) > annotationScore(best) ? cur : best);
     });
+  }
+
+  /// Score a photo by annotation completeness: who+where+event = 3 points + scene_tags bonus
+  function annotationScore(p: Photo): number {
+    const ann = annotations[p.file_path_hash];
+    if (!ann) return 0;
+    let score = 0;
+    if (ann.who) score += 1;
+    if (ann.where_place) score += 1;
+    if (ann.event) score += 1;
+    if (p.scene_tags && p.scene_tags.length > 0) score += 0.5;
+    return score;
   }
 
   function dateConfidence(photo: Photo): 'high' | 'medium' | 'low' | 'very-low' {
@@ -1452,10 +1463,14 @@
     object-fit: cover;
     transition: transform 0.2s ease, z-index 0s;
   }
+  .photo-thumb:hover {
+    overflow: visible;
+    z-index: 50;
+  }
   .photo-thumb:hover img {
     transform: scale(4);
-    z-index: 50;
-    position: relative;
+    position: absolute;
+    top: 0; left: 0;
     border-radius: 3px;
     box-shadow: 0 8px 30px rgba(0,0,0,0.35);
   }
