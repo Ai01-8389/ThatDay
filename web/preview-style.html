@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>That Day — Preview</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --page: #FDF9F3;
+      --ink: #14110E;
+      --warm: #5C3D2E;
+      --pop: #E85D2C;
+      --gold: #E8A817;
+      --navy: #173A4A;
+      --green: #2D6A4F;
+      --muted: #8B7E70;
+      --hairline: #EBE3D5;
+      --surface: #FFFBF5;
+      --loud: #BF2C10;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background: var(--page);
+      color: var(--ink);
+      line-height: 1.65;
+      font-size: 1.08rem;
+      font-weight: 400;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Noise */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0;
+      opacity: 0.018;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+
+    /* ── Nav ── */
+    .nav {
+      position: relative; z-index: 1;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.5rem 2rem; max-width: 1060px; margin: 0 auto;
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 0.65rem; text-decoration: none; color: var(--ink);
+    }
+    .nav-brand img { width: 32px; height: 32px; border-radius: 7px; }
+    .nav-brand span {
+      font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em;
+    }
+    .nav-links { display: flex; gap: 1.75rem; align-items: center; }
+    .nav-links a { color: var(--warm); text-decoration: none; font-size: 0.9rem; font-weight: 500; }
+    .nav-links a:hover { color: var(--pop); }
+    .btn-nav, .btn-nav:link, .btn-nav:visited {
+      background: var(--pop); color: white; border: none;
+      padding: 0.45rem 1.1rem; border-radius: 5px;
+      font-family: inherit; font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; text-decoration: none; display: inline-block;
+      transition: background 0.15s;
+    }
+    .btn-nav:hover { background: var(--loud); }
+
+    /* Shared */
+    .container { position: relative; z-index: 1; max-width: 780px; margin: 0 auto; padding: 0 2rem; }
+    .wide { max-width: 1060px; }
+
+    /* ── Hero ── */
+    .hero { padding: 5rem 0 2rem; }
+    .hero .eyebrow {
+      font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--pop); font-weight: 700; margin-bottom: 0.75rem;
+    }
+    .hero h1 {
+      font-size: clamp(2.4rem, 5.5vw, 3.8rem); font-weight: 800;
+      line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 1.5rem;
+    }
+    .hero h1 em {
+      font-style: normal; background: linear-gradient(120deg, var(--pop) 0%, var(--gold) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero h1 .strike {
+      text-decoration: line-through; text-decoration-color: var(--pop);
+      text-decoration-thickness: 4px; color: var(--muted);
+    }
+    .hero p {
+      font-size: 1.12rem; color: var(--warm); max-width: 560px;
+      margin-bottom: 2rem; line-height: 1.75;
+    }
+    .hero .btn-row { display: flex; gap: 0.85rem; align-items: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-block; padding: 0.8rem 1.6rem; border-radius: 6px;
+      font-family: inherit; font-size: 0.98rem; font-weight: 600;
+      text-decoration: none; cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { background: var(--pop); color: white; }
+    .btn-primary:hover { background: var(--loud); }
+    .btn-outline {
+      background: transparent; color: var(--ink);
+      border: 2px solid var(--ink); padding: 0.72rem 1.52rem;
+    }
+    .btn-outline:hover { background: var(--ink); color: white; }
+    .hero .note { margin-top: 1.25rem; color: var(--muted); font-size: 0.88rem; }
+
+    /* ── Loud strip ── */
+    .loud-strip {
+      background: var(--pop); color: white; padding: 1.5rem 2rem; text-align: center;
+      margin: 2.5rem 0;
+    }
+    .loud-strip p {
+      font-size: 1.2rem; font-weight: 600; max-width: 660px; margin: 0 auto;
+      letter-spacing: -0.01em;
+    }
+
+    /* ── Pull quote ── */
+    .pull-quote {
+      border-top: 2px solid var(--pop); border-bottom: 2px solid var(--pop);
+      padding: 3.5rem 2rem; margin: 3rem 0; text-align: center;
+    }
+    .pull-quote blockquote {
+      font-size: 1.55rem; font-weight: 600; line-height: 1.4;
+      max-width: 640px; margin: 0 auto 1rem; letter-spacing: -0.01em;
+      font-style: normal;
+    }
+    .pull-quote .attribution { color: var(--muted); font-size: 0.85rem; }
+
+    /* ── Feature blocks ── */
+    .block-section { padding: 3rem 0; }
+    .block-label {
+      font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--pop); font-weight: 700; margin-bottom: 0.5rem;
+    }
+    .block-heading {
+      font-size: 2rem; font-weight: 800; line-height: 1.2;
+      margin-bottom: 1.25rem; letter-spacing: -0.015em;
+    }
+    .block-body {
+      font-size: 1.05rem; color: var(--warm); line-height: 1.85; max-width: 620px;
+    }
+
+    .feature-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;
+      margin: 4rem 0;
+    }
+    .feature-row.reverse { direction: rtl; }
+    .feature-row.reverse > * { direction: ltr; }
+    .feature-text h3 {
+      font-size: 1.65rem; font-weight: 700; margin-bottom: 0.65rem;
+      letter-spacing: -0.01em;
+    }
+    .feature-text p { color: var(--warm); line-height: 1.75; }
+    .feature-badge {
+      display: inline-block; background: var(--gold); color: var(--ink);
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.08em; padding: 0.2rem 0.6rem; border-radius: 3px;
+      margin-bottom: 0.65rem;
+    }
+    .feature-img {
+      border-radius: 12px; min-height: 260px;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 3rem;
+    }
+    .img-1 { background: linear-gradient(135deg, var(--pop), var(--gold)); }
+    .img-2 { background: linear-gradient(135deg, var(--green), var(--navy)); }
+    .img-3 { background: linear-gradient(135deg, var(--gold), var(--pop)); }
+
+    /* ── Numbers strip ── */
+    .numbers {
+      background: var(--navy); color: white; padding: 4rem 2rem; margin: 3rem 0;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;
+      text-align: center; max-width: 800px; margin-left: auto; margin-right: auto;
+      position: relative; z-index: 1;
+    }
+    .numbers .num {
+      font-size: 3.2rem; font-weight: 900; line-height: 1;
+      color: var(--gold);
+    }
+    .numbers .num-label { font-size: 0.9rem; opacity: 0.75; margin-top: 0.35rem; }
+
+    /* ── Accent bar (green) ── */
+    .accent-bar {
+      background: var(--green); color: white; padding: 5rem 2rem;
+      margin: 3rem 0; text-align: center;
+    }
+    .accent-bar h2 { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.01em; }
+    .accent-bar p { opacity: 0.8; max-width: 500px; margin: 0 auto; }
+
+    /* ── Testimonials ── */
+    .testimonials { padding: 4rem 0; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .testimonial {
+      padding: 1.5rem; border-left: 4px solid var(--pop);
+      background: var(--surface); border-radius: 0 8px 8px 0;
+    }
+    .testimonial p { color: var(--warm); margin-bottom: 0.65rem; line-height: 1.65; }
+    .testimonial .name { color: var(--muted); font-size: 0.82rem; font-weight: 500; }
+
+    /* ── Pricing ── */
+    .pricing-block { padding: 5rem 0; text-align: center; }
+    .pricing-block .block-heading { text-align: center; }
+    .pricing-card {
+      display: inline-block; background: white; border: 2px solid var(--hairline);
+      border-radius: 14px; padding: 2.5rem 2.5rem; text-align: left;
+      max-width: 400px; width: 100%;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+      border-top: 5px solid var(--pop);
+    }
+    .price {
+      font-size: 3rem; font-weight: 900; color: var(--ink); line-height: 1;
+      letter-spacing: -0.02em;
+    }
+    .price sub { font-size: 0.9rem; color: var(--muted); font-weight: 500; }
+    .pricing-card ul { list-style: none; margin: 1.5rem 0; }
+    .pricing-card ul li { padding: 0.35rem 0; color: var(--warm); font-size: 0.9rem; font-weight: 500; }
+    .pricing-card ul li::before { content: '✓ '; color: var(--green); font-weight: 700; }
+
+    /* ── Footer ── */
+    .footer {
+      position: relative; z-index: 1;
+      max-width: 1060px; margin: 0 auto; padding: 3rem 2rem;
+      display: flex; justify-content: space-between; align-items: flex-start;
+      flex-wrap: wrap; gap: 2rem;
+      border-top: 1px solid var(--hairline);
+    }
+    .footer-col h4 {
+      font-size: 0.9rem; font-weight: 700; margin-bottom: 0.65rem;
+    }
+    .footer-col a {
+      display: block; color: var(--muted); text-decoration: none;
+      font-size: 0.85rem; padding: 0.18rem 0;
+    }
+    .footer-col a:hover { color: var(--pop); }
+    .footer-bottom {
+      position: relative; z-index: 1;
+      text-align: center; padding: 2rem; color: var(--muted); font-size: 0.8rem;
+    }
+
+    @media (max-width: 768px) {
+      .feature-row { grid-template-columns: 1fr; gap: 1.5rem; }
+      .testimonials { grid-template-columns: 1fr; }
+      .numbers { grid-template-columns: 1fr; gap: 1.5rem; }
+      .nav { padding: 1rem 1.5rem; flex-wrap: wrap; gap: 0.75rem; }
+      .hero { padding: 3rem 0 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a href="/" class="nav-brand">
+      <img src="icon.png" alt="That Day" width="32" height="32">
+      <span>That Day</span>
+    </a>
+    <div class="nav-links">
+      <a href="#">Blog</a>
+      <a href="#pricing">$9.79/mo</a>
+      <a href="#" class="btn-nav">Download</a>
+    </div>
+  </nav>
+
+  <section class="hero container">
+    <p class="eyebrow">Your photos have a story to tell</p>
+    <h1>
+      You don't need<br>
+      <em>another app.</em><br>
+      You need <span class="strike">a reason</span> to open your old photos.
+    </h1>
+    <p>
+      Thousands of photos sitting in folders named <strong>IMG_4729</strong>.
+      Moments you'll never scroll through. That Day finds one date across all years,
+      asks three quick questions, and turns it into a story in your inbox every morning.
+    </p>
+    <div class="btn-row">
+      <a href="#" class="btn btn-primary">Download for Windows &rarr;</a>
+      <a href="#pricing" class="btn btn-outline">$9.79/month</a>
+    </div>
+    <p class="note">7-day free trial. No credit card needed.</p>
+  </section>
+
+  <div class="loud-strip">
+    <p>"I saw my dad in a 2019 photo I forgot I had. The story That Day wrote made me text him." — Early user</p>
+  </div>
+
+  <section class="container wide">
+    <div class="feature-row">
+      <div class="feature-text">
+        <span class="feature-badge">Step 1</span>
+        <h3>Pick a day. See every year at once.</h3>
+        <p>
+          July&nbsp;16 in 2018. July&nbsp;16 in 2021. July&nbsp;16 in 2024.
+          One screen, one scroll. A decade of you on a single calendar date.
+          No AI guessing what matters — you look at the photos and decide.
+        </p>
+      </div>
+      <div class="feature-img img-1" aria-hidden="true">📷</div>
+    </div>
+
+    <div class="feature-row reverse">
+      <div class="feature-text">
+        <span class="feature-badge" style="background:var(--green);color:white">Step 2</span>
+        <h3>Three words per photo. Two minutes per day.</h3>
+        <p>
+          Who's in the photo? Where was it? Doing what?
+          Type it or say it. The AI does the writing.
+          You just tell the truth.
+        </p>
+      </div>
+      <div class="feature-img img-2" aria-hidden="true">✍️</div>
+    </div>
+
+    <div class="feature-row">
+      <div class="feature-text">
+        <span class="feature-badge" style="background:var(--navy);color:white">Step 3</span>
+        <h3>Every morning, a story arrives.</h3>
+        <p>
+          8&nbsp;AM. Inbox. A warm, personal story written in English.
+          Listen to it on the way to work. Save the PDF. Share it with someone.
+          It's just there.
+        </p>
+      </div>
+      <div class="feature-img img-3" aria-hidden="true">📬</div>
+    </div>
+  </section>
+
+  <div class="numbers">
+    <div>
+      <div class="num">3</div>
+      <div class="num-label">Words per photo</div>
+    </div>
+    <div>
+      <div class="num">2</div>
+      <div class="num-label">Minutes per day</div>
+    </div>
+    <div>
+      <div class="num">∞</div>
+      <div class="num-label">Years of memories</div>
+    </div>
+  </div>
+
+  <section class="accent-bar">
+    <h2>Your photos stay on your computer.</h2>
+    <p>Only your words and stories sync. Nothing else. Ever.</p>
+  </section>
+
+  <section class="container testimonials">
+    <div class="testimonial">
+      <p>"Thought it was just a photo tool. It's actually a daily letter from my past self."</p>
+      <span class="name">Sarah, California</span>
+    </div>
+    <div class="testimonial">
+      <p>"My mom's been gone two years. That Day found a photo I'd never organized. Worth every cent."</p>
+      <span class="name">Michael, Toronto</span>
+    </div>
+  </section>
+
+  <section class="pricing-block container" id="pricing">
+    <span class="block-label">Pricing</span>
+    <h2 class="block-heading">One plan. No tricks.</h2>
+    <div class="pricing-card">
+      <div class="price">$9.79 <sub>/ month</sub></div>
+      <ul>
+        <li>Photos from 2017 to today</li>
+        <li>AI-written daily story</li>
+        <li>Natural voice narration</li>
+        <li>PDF keepsake for every day</li>
+        <li>Daily email at 8 AM</li>
+        <li>Cancel anytime</li>
+      </ul>
+      <a href="#" class="btn btn-primary" style="display:block;text-align:center">Start free trial</a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer">
+      <div class="footer-col">
+        <h4>That Day</h4>
+        <a href="#">Blog</a>
+        <a href="#">Subscribe</a>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms</a>
+        <a href="#">Refunds</a>
+      </div>
+      <div class="footer-col">
+        <h4>Help</h4>
+        <a href="#">Contact</a>
+        <a href="#">Cookies</a>
+      </div>
+    </div>
+    <p class="footer-bottom">&copy; 2026 That Day — Browse your life, one day at a time.</p>
+  </footer>
+
+</body>
+</html>

@@ -13,6 +13,7 @@ use std::path::{Path, PathBuf};
 
 const BRAND: &str = "That Day";
 const BRAND_URL: &str = "thatday.vip";
+const LOGO_PNG: &[u8] = include_bytes!("../icons/icon.png");
 
 pub struct PdfPhoto {
     pub file_path_hash: String,
@@ -87,17 +88,28 @@ pub fn generate(
     decorator.set_margins(20);
     doc.set_page_decorator(decorator);
 
-    // ── Cover page (minimal) ──
-    push_br(&mut doc, 10);
-    push_text(&mut doc, BRAND, 36, Alignment::Center, true);
+    // ── Write logo to temp file (genpdf images must be loaded from path) ──
+    let logo_tmp = std::env::temp_dir().join("thatday_logo.pdfgen.png");
+    std::fs::write(&logo_tmp, LOGO_PNG).ok();
+
+    // ── Cover page ──
+    push_br(&mut doc, 6);
+    if logo_tmp.exists() {
+        if let Ok(mut img) = elements::Image::from_path(&logo_tmp) {
+            img.set_dpi(400.0); // Scale icon to ~65px wide for cover
+            doc.push(img);
+        }
+    }
     push_br(&mut doc, 2);
-    push_text(&mut doc, &format_date(date), 16, Alignment::Center, false);
+    push_text(&mut doc, BRAND, 28, Alignment::Center, true);
     push_br(&mut doc, 2);
-    push_text(&mut doc, title, 12, Alignment::Center, false);
-    push_br(&mut doc, 8);
+    push_text(&mut doc, &format_date(date), 14, Alignment::Center, false);
+    push_br(&mut doc, 2);
+    push_text(&mut doc, title, 11, Alignment::Center, false);
+    push_br(&mut doc, 6);
     push_text(&mut doc, BRAND_URL, 9, Alignment::Center, false);
     // Force page break after cover (genpdf has no native PageBreak; fill with blank lines)
-    push_br(&mut doc, 35);
+    push_br(&mut doc, 28);
 
     // ── Body ──
     let mut photos = load_photos(app_dir, date)?;
@@ -106,19 +118,25 @@ pub fn generate(
     // Dedup burst + visually similar photos (30s window + aHash)
     photos = dedup_photos(photos, &thumb_dir);
 
-    // Logo in top-right of body page
+    // Brand in top-right of body page
     push_text(&mut doc, BRAND, 10, Alignment::Right, true);
     push_br(&mut doc, 2);
 
-    // Photos (chronological)
+    // Photos (chronological) — page-break every N photos to avoid image cutoff at page bottom
     if !photos.is_empty() {
         push_text(&mut doc, "Photos", 12, Alignment::Left, true);
         push_br(&mut doc, 1);
+        let mut photos_on_page: u32 = 0;
+        const MAX_PER_PAGE: u32 = 3;
         for photo in &photos {
+            if photos_on_page >= MAX_PER_PAGE {
+                push_br(&mut doc, 45); // force page break
+                photos_on_page = 0;
+            }
             let thumb_path = thumb_dir.join(format!("{}.jpg", photo.file_path_hash));
             if thumb_path.exists() {
                 if let Ok(mut img) = elements::Image::from_path(&thumb_path) {
-                    img.set_dpi(96.0); // scale thumb ~3x (300px @ 300dpi → ~900px display)
+                    img.set_dpi(96.0); // scale thumb ~3x
                     doc.push(img);
                     let cap = build_caption(photo);
                     if !cap.is_empty() {
@@ -127,6 +145,7 @@ pub fn generate(
                     push_br(&mut doc, 2);
                 }
             }
+            photos_on_page += 1;
         }
     }
 

@@ -198,7 +198,7 @@
   // ── Problem 5: Sorted + clustered photo groups derived from photos ──
   let displayGroups = $derived(buildDisplayGroups(photos, photoFilter));
 
-  /** Group photos: by year (newest first), then time-cluster within each year (30-min gap). */
+  /** Group photos: by year (oldest first), time-of-day period, then time-cluster (30-min gap). */
   function buildDisplayGroups(all: Photo[], filter: string): { label: string; photos: Photo[] }[] {
     let filtered = all;
     if (filter === "people") {
@@ -229,20 +229,39 @@
     const years = [...byYear.keys()].sort((a, b) => a - b);
 
     const groups: { label: string; photos: Photo[] }[] = [];
+    const periodOrder = ["Morning", "Afternoon", "Evening", "Night"];
     for (const year of years) {
       const yearPhotos = byYear.get(year)!;
-      let current: Photo[] = [];
-      for (let i = 0; i < yearPhotos.length; i++) {
-        if (i > 0 && yearPhotos[i].taken_at && yearPhotos[i - 1].taken_at) {
-          const gap = yearPhotos[i].taken_at! - yearPhotos[i - 1].taken_at!;
-          if (gap > 30 * 60) {
-            groups.push({ label: `${year} · ${groupLabel(current)}`, photos: [...current] });
-            current = [];
-          }
+
+      // Within each year, separate by time-of-day
+      const byPeriod = new Map<string, Photo[]>();
+      for (const p of yearPhotos) {
+        if (p.taken_at) {
+          const hour = new Date(p.taken_at * 1000).getHours();
+          const period = hour < 6 ? "Night" : hour < 12 ? "Morning" : hour < 18 ? "Afternoon" : "Evening";
+          if (!byPeriod.has(period)) byPeriod.set(period, []);
+          byPeriod.get(period)!.push(p);
         }
-        current.push(yearPhotos[i]);
       }
-      if (current.length > 0) groups.push({ label: `${year} · ${groupLabel(current)}`, photos: [...current] });
+
+      // Emit groups in period order (Morning → Afternoon → Evening → Night)
+      for (const period of periodOrder) {
+        const periodPhotos = byPeriod.get(period);
+        if (!periodPhotos || periodPhotos.length === 0) continue;
+
+        let current: Photo[] = [];
+        for (let i = 0; i < periodPhotos.length; i++) {
+          if (i > 0 && periodPhotos[i].taken_at && periodPhotos[i - 1].taken_at) {
+            const gap = periodPhotos[i].taken_at! - periodPhotos[i - 1].taken_at!;
+            if (gap > 30 * 60) {
+              groups.push({ label: `${year} · ${period} · ${groupLabel(current)}`, photos: [...current] });
+              current = [];
+            }
+          }
+          current.push(periodPhotos[i]);
+        }
+        if (current.length > 0) groups.push({ label: `${year} · ${period} · ${groupLabel(current)}`, photos: [...current] });
+      }
     }
     return groups;
   }
