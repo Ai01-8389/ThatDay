@@ -128,26 +128,27 @@ Rules:
 ${row.calendar_date}
 ${contextLines}`;
 
-  const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
+  const response = await fetch("https://api.deepseek.com/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: "deepseek-chat",
+      model: "deepseek-v4-flash",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
       max_tokens: 2000,
       temperature: 0.8,
+      thinking: { type: "disabled" },
     }),
   });
 
   if (!response.ok) {
     const errText = await response.text();
-    console.error("DeepSeek story error:", errText);
+    console.error("DeepSeek story error:", response.status, errText);
     throw new Error(`DeepSeek ${response.status}: ${errText.slice(0, 200)}`);
   }
 
